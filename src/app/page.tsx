@@ -1,6 +1,7 @@
 import { Header, Footer } from "@/components/layout";
 import {
   Hero,
+  Personalities,
   Philosophy,
   Experience,
   Quote,
@@ -13,12 +14,13 @@ export default function Home() {
     <main>
       <Header />
       <Hero />
+      <Personalities />
       <Philosophy />
       <Experience />
       <Quote />
       <Stories />
       <Waitlist />
       <Footer />
-    </main>
+      </main>
   );
 }

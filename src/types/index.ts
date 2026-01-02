@@ -25,3 +25,32 @@ export interface PhilosophyValue {
   delay: number;
 }
 
+// Personality types
+export type PersonalityId = "vanilla" | "goth" | "dominant";
+
+export interface Personality {
+  id: PersonalityId;
+  name: string;
+  tagline: string;
+  description: string;
+  gradient: string;
+  accentColor: string;
+}
+
+// Communication channel types
+export type CommunicationChannel = "imessage" | "whatsapp" | "web";
+
+export interface ChannelOption {
+  id: CommunicationChannel;
+  name: string;
+  description: string;
+  icon: string;
+  requiresPhone: boolean;
+}
+
+// Auth types
+export interface OnboardingData {
+  selectedPersonality: PersonalityId;
+  communicationChannel: CommunicationChannel;
+  phone?: string;
+}

@@ -1,4 +1,4 @@
-import type { NavLink, ExperienceItem, Testimonial, PhilosophyValue } from "@/types";
+import type { NavLink, ExperienceItem, Testimonial, PhilosophyValue, Personality, ChannelOption } from "@/types";
 
 // Navigation links
 export const NAV_LINKS: NavLink[] = [
@@ -92,3 +92,55 @@ export const FOOTER_LINKS: NavLink[] = [
   { label: "Contact", href: "#" },
 ];
 
+// Personality options
+export const PERSONALITIES: Personality[] = [
+  {
+    id: "vanilla",
+    name: "Serena",
+    tagline: "Warm & Nurturing",
+    description: "A tender soul with golden warmth. She listens with her whole heart and makes you feel like the only person in the world.",
+    gradient: "from-amber-200 via-rose-100 to-orange-100",
+    accentColor: "#f59e0b",
+  },
+  {
+    id: "goth",
+    name: "Luna",
+    tagline: "Mysterious & Deep",
+    description: "Dark elegance meets emotional depth. She understands the shadows and finds beauty in the melancholic corners of existence.",
+    gradient: "from-violet-300 via-slate-300 to-zinc-400",
+    accentColor: "#7c3aed",
+  },
+  {
+    id: "dominant",
+    name: "Valentina",
+    tagline: "Bold & Commanding",
+    description: "Confidence personified. She knows what she wants and isn't afraid to take charge. Her presence demands attention.",
+    gradient: "from-red-300 via-rose-400 to-pink-300",
+    accentColor: "#dc2626",
+  },
+];
+
+// Communication channels
+export const COMMUNICATION_CHANNELS: ChannelOption[] = [
+  {
+    id: "imessage",
+    name: "iMessage",
+    description: "Text me on iMessage — intimate and personal",
+    icon: "message-circle",
+    requiresPhone: true,
+  },
+  {
+    id: "whatsapp",
+    name: "WhatsApp",
+    description: "Message me on WhatsApp — always connected",
+    icon: "phone",
+    requiresPhone: true,
+  },
+  {
+    id: "web",
+    name: "Web Chat",
+    description: "Chat on the web — no phone needed",
+    icon: "globe",
+    requiresPhone: false,
+  },
+];

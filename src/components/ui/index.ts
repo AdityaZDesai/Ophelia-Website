@@ -4,4 +4,7 @@ export { SectionHeading } from "./SectionHeading";
 export { ExperienceCard } from "./ExperienceCard";
 export { TestimonialCard } from "./TestimonialCard";
 export { PhilosophyCard } from "./PhilosophyCard";
-
+export { PersonalityCard } from "./PersonalityCard";
+export { AuthModal } from "./AuthModal";
+export { ChannelSelector } from "./ChannelSelector";
+export { PhoneInput } from "./PhoneInput";
