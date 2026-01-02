@@ -35,6 +35,7 @@ export interface Personality {
   description: string;
   gradient: string;
   accentColor: string;
+  image: string;
 }
 
 // Communication channel types

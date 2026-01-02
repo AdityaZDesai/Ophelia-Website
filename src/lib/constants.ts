@@ -101,6 +101,7 @@ export const PERSONALITIES: Personality[] = [
     description: "A tender soul with golden warmth. She listens with her whole heart and makes you feel like the only person in the world.",
     gradient: "from-amber-200 via-rose-100 to-orange-100",
     accentColor: "#f59e0b",
+    image: "/personalities/serena.png",
   },
   {
     id: "goth",
@@ -109,6 +110,7 @@ export const PERSONALITIES: Personality[] = [
     description: "Dark elegance meets emotional depth. She understands the shadows and finds beauty in the melancholic corners of existence.",
     gradient: "from-violet-300 via-slate-300 to-zinc-400",
     accentColor: "#7c3aed",
+    image: "/personalities/luna.png",
   },
   {
     id: "dominant",
@@ -117,6 +119,7 @@ export const PERSONALITIES: Personality[] = [
     description: "Confidence personified. She knows what she wants and isn't afraid to take charge. Her presence demands attention.",
     gradient: "from-red-300 via-rose-400 to-pink-300",
     accentColor: "#dc2626",
+    image: "/personalities/valentina.png",
   },
 ];
 

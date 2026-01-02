@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { Personality } from "@/types";
 
 interface PersonalityCardProps {
@@ -16,67 +17,49 @@ export function PersonalityCard({
   return (
     <button
       onClick={() => onSelect(personality)}
-      className={`
-        group relative overflow-hidden rounded-2xl p-8 text-left transition-all duration-500
-        hover:scale-[1.02] hover:shadow-2xl
-        ${isSelected 
-          ? "ring-2 ring-offset-4 ring-offset-[#0a0a0a] shadow-2xl scale-[1.02]" 
-          : "hover:ring-1 hover:ring-white/20"
-        }
-      `}
-      style={{
-        borderColor: isSelected ? personality.accentColor : "transparent",
-        boxShadow: isSelected 
-          ? `0 20px 60px -15px ${personality.accentColor}40` 
-          : undefined,
-        ["--accent" as string]: personality.accentColor,
-      }}
+      className="group text-left transition-all duration-500 focus:outline-none"
     >
-      {/* Gradient Background */}
+      {/* Image Container */}
       <div
-        className={`absolute inset-0 bg-gradient-to-br ${personality.gradient} opacity-80 transition-opacity duration-500 group-hover:opacity-100`}
-      />
-      
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-      
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full min-h-[280px]">
-        {/* Name & Tagline */}
-        <div className="mb-auto">
-          <h3 className="font-cormorant text-3xl md:text-4xl font-semibold text-white mb-2 tracking-tight">
-            {personality.name}
-          </h3>
-          <p 
-            className="font-jakarta text-sm font-medium tracking-wider uppercase"
-            style={{ color: personality.accentColor }}
-          >
-            {personality.tagline}
-          </p>
-        </div>
+        className={`
+          relative aspect-[3/4] overflow-hidden rounded-3xl mb-6
+          transition-all duration-500 ease-out
+          ${isSelected 
+            ? "ring-2 ring-accent-deep ring-offset-4 ring-offset-background shadow-2xl scale-[1.02]" 
+            : "hover:shadow-xl hover:scale-[1.01]"
+          }
+        `}
+      >
+        <Image
+          src={personality.image}
+          alt={personality.name}
+          fill
+          className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, 33vw"
+          priority
+        />
         
-        {/* Description */}
-        <p className="font-jakarta text-white/90 text-sm leading-relaxed mt-6">
-          {personality.description}
-        </p>
-        
-        {/* Selection Indicator */}
-        <div className="mt-6 flex items-center gap-3">
+        {/* Minimal bottom gradient for depth */}
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      </div>
+      
+      {/* Text Content - Clean & Minimal */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          {/* Selection indicator */}
           <div
             className={`
-              w-5 h-5 rounded-full border-2 transition-all duration-300 flex items-center justify-center
-              ${isSelected ? "border-white bg-white" : "border-white/50"}
+              w-4 h-4 rounded-full border-2 transition-all duration-300 flex items-center justify-center flex-shrink-0
+              ${isSelected 
+                ? "border-accent-deep bg-accent-deep" 
+                : "border-text-light group-hover:border-accent"
+              }
             `}
           >
             {isSelected && (
-              <svg
-                className="w-3 h-3"
-                viewBox="0 0 12 12"
-                fill="none"
-                style={{ color: personality.accentColor }}
-              >
+              <svg className="w-2 h-2 text-white" viewBox="0 0 12 12" fill="none">
                 <path
-                  d="M2 6L5 9L10 3"
+                  d="M2.5 6L5 8.5L9.5 3.5"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
@@ -85,12 +68,20 @@ export function PersonalityCard({
               </svg>
             )}
           </div>
-          <span className="font-jakarta text-white/70 text-sm">
-            {isSelected ? "Selected" : "Choose me"}
-          </span>
+          
+          <h3 className="font-serif text-2xl md:text-3xl font-light text-foreground tracking-tight">
+            {personality.name}
+          </h3>
         </div>
+        
+        <p className="text-sm font-medium tracking-wide uppercase text-accent-deep pl-7">
+          {personality.tagline}
+        </p>
+        
+        <p className="text-text-muted text-sm leading-relaxed pl-7 pt-1">
+          {personality.description}
+        </p>
       </div>
     </button>
   );
 }
-

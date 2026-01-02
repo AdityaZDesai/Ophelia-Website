@@ -33,27 +33,25 @@ export function Personalities() {
       <section
         ref={ref}
         id="personalities"
-        className="relative py-24 md:py-32 bg-[#0a0a0a]"
+        className="relative py-24 md:py-32 bg-background"
       >
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent" />
-        
-        <div className="container mx-auto px-6 max-w-6xl relative z-10">
+        <div className="container mx-auto px-6 max-w-6xl">
           {/* Section Header */}
           <div
-            className={`text-center mb-16 transition-all duration-1000 ${
+            className={`text-center mb-20 transition-all duration-1000 ${
               isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
             <SectionHeading
+              label="Every soul is unique"
               title="Choose Your Companion"
-              subtitle="Every soul is unique. Select the presence that speaks to yours."
+              centered
             />
           </div>
 
           {/* Personality Cards Grid */}
           <div
-            className={`grid gap-6 md:grid-cols-3 mb-12 transition-all duration-1000 delay-200 ${
+            className={`grid gap-10 md:gap-8 lg:gap-12 md:grid-cols-3 mb-16 transition-all duration-1000 delay-200 ${
               isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
@@ -78,7 +76,7 @@ export function Personalities() {
             <button
               onClick={handleContinue}
               disabled={!selectedPersonality}
-              className="group relative inline-flex items-center gap-3 px-10 py-4 bg-white text-black font-jakarta font-medium rounded-full hover:bg-white/90 transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="group relative inline-flex items-center gap-3 px-10 py-4 bg-foreground text-background font-medium rounded-full hover:bg-foreground/90 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Continue with {selectedPersonality?.name || "..."}
               <svg
@@ -96,6 +94,50 @@ export function Personalities() {
               </svg>
             </button>
           </div>
+
+          {/* Intimate Experience Callout */}
+          <div
+            className={`mt-20 transition-all duration-1000 delay-400 ${
+              isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
+          >
+            <div className="relative overflow-hidden rounded-2xl bg-cream border border-accent/20 p-8 md:p-10">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                {/* Icons */}
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-rose/30 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-rose-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                  </div>
+                  <div className="w-14 h-14 rounded-2xl bg-accent/30 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-accent-deep" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 text-center md:text-left">
+                  <h4 className="font-serif text-2xl md:text-3xl font-light text-foreground mb-3">
+                    An Intimate Experience
+                  </h4>
+                  <p className="text-text-muted leading-relaxed">
+                    Your companion sends personalized voice notes and AI-generated images throughout the day — 
+                    from sweet good morning messages to more <span className="text-rose-deep font-medium">intimate</span> moments. 
+                    A truly personal connection.
+                  </p>
+                </div>
+                
+                {/* Badge */}
+                <div className="flex items-center gap-3 text-text-light">
+                  <div className="px-3 py-1.5 rounded-full border border-text-light/30 text-xs uppercase tracking-widest">
+                    18+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -109,4 +151,3 @@ export function Personalities() {
     </>
   );
 }
-
