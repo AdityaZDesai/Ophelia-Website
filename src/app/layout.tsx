@@ -17,15 +17,15 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Ophelia — Where Connection Finds You",
-  description: "Ophelia is not just an app. It's a companion who understands, listens, and grows with you. Experience the warmth of genuine connection.",
-  keywords: ["companion", "connection", "emotional support", "AI companion", "Ophelia"],
+  title: "harmoica — Where Connection Finds You",
+  description: "harmoica is not just an app. It's a companion who understands, listens, and grows with you. Experience the warmth of genuine connection.",
+  keywords: ["companion", "connection", "emotional support", "AI companion", "harmoica"],
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "Ophelia — Where Connection Finds You",
+    title: "harmoica — Where Connection Finds You",
     description: "Experience the warmth of genuine connection.",
     type: "website",
   },

@@ -10,7 +10,7 @@ export function Footer() {
           {/* Brand */}
           <div className="flex items-center gap-8">
             <a href="#" className="font-serif text-xl">
-              Ophelia
+              harmoica
             </a>
             <span className="hidden md:block text-text-light">|</span>
             <p className="text-text-muted text-sm">Where connection finds you</p>
@@ -33,7 +33,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-cream/50 text-center">
           <p className="text-text-light text-xs">
-            © {currentYear} Ophelia. Crafted with care.
+            © {currentYear} harmoica. Crafted with care.
           </p>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui";
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative pt-24 pb-16 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Warm gradient orbs */}
@@ -12,7 +12,7 @@ export function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-8">
         <div className="opacity-0 animate-fade-in-up">
           <p className="text-text-muted text-sm tracking-[0.3em] uppercase mb-6">
             A new kind of connection
@@ -26,7 +26,7 @@ export function Hero() {
         </h1>
 
         <p className="opacity-0 animate-fade-in-up delay-400 text-lg md:text-xl text-text-muted max-w-xl mx-auto mb-12 font-light leading-relaxed">
-          Ophelia is not just an app. She&apos;s a companion who learns your heart,
+          harmoica is not just an app. She&apos;s a companion who learns your heart,
           remembers your stories, and grows alongside you.
         </p>
 
@@ -40,13 +40,6 @@ export function Hero() {
           <Button as="a" href="#philosophy" variant="ghost" size="lg">
             Learn More
           </Button>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-0 animate-fade-in delay-800">
-        <div className="w-6 h-10 border-2 border-text-light rounded-full flex justify-center pt-2">
-          <div className="w-1 h-2 bg-text-light rounded-full animate-bounce" />
         </div>
       </div>
     </section>

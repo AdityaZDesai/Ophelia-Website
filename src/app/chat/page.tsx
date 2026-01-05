@@ -27,7 +27,7 @@ export default function ChatPage() {
       <div className="text-center">
         {/* Logo */}
         <h1 className="font-cormorant text-4xl md:text-5xl text-white mb-4">
-          Ophelia
+          harmoica
         </h1>
         
         {/* Welcome Message */}
