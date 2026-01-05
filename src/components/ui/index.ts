@@ -8,3 +8,4 @@ export { PersonalityCard } from "./PersonalityCard";
 export { AuthModal } from "./AuthModal";
 export { ChannelSelector } from "./ChannelSelector";
 export { PhoneInput } from "./PhoneInput";
+export { AudioPlayer } from "./AudioPlayer";

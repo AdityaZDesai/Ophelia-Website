@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useInView } from "@/hooks/useInView";
-import { PersonalityCard, AuthModal, SectionHeading } from "@/components/ui";
+import { PersonalityCard, AuthModal, SectionHeading, AudioPlayer } from "@/components/ui";
 import { PERSONALITIES } from "@/lib/constants";
 import type { Personality } from "@/types";
 
@@ -63,6 +63,36 @@ export function Personalities() {
                 onSelect={handlePersonalitySelect}
               />
             ))}
+          </div>
+
+          {/* Voice Samples */}
+          <div
+            className={`mb-16 transition-all duration-1000 delay-300 ${
+              isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
+          >
+            <div className="text-center mb-8">
+              <p className="text-text-muted text-sm tracking-[0.3em] uppercase mb-3">
+                Voice Samples
+              </p>
+              <h3 className="font-serif text-2xl md:text-3xl font-light text-foreground">
+                Hear Their Voices
+              </h3>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
+              <AudioPlayer
+                src="/voice_samples/Jessica(v3).mp3"
+                name="Jessica"
+              />
+              <AudioPlayer
+                src="/voice_samples/Serafina.mp3"
+                name="Serafina"
+              />
+              <AudioPlayer
+                src="/voice_samples/Ivanna.mp3"
+                name="Ivanna"
+              />
+            </div>
           </div>
 
           {/* Continue Button */}
