@@ -1,12 +1,12 @@
 import { Header, Footer } from "@/components/layout";
 import {
   Hero,
+  Messaging,
   Personalities,
-  Philosophy,
   Experience,
-  Quote,
   Stories,
   Waitlist,
+  FAQ,
 } from "@/components/sections";
 
 export default function Home() {
@@ -14,12 +14,12 @@ export default function Home() {
     <main>
       <Header />
       <Hero />
+      <Messaging />
       <Personalities />
-      <Philosophy />
       <Experience />
-      <Quote />
       <Stories />
       <Waitlist />
+      <FAQ />
       <Footer />
       </main>
   );

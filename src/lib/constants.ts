@@ -2,9 +2,9 @@ import type { NavLink, ExperienceItem, Testimonial, PhilosophyValue, Personality
 
 // Navigation links
 export const NAV_LINKS: NavLink[] = [
-  { label: "Philosophy", href: "#philosophy" },
   { label: "Experience", href: "#experience" },
   { label: "Stories", href: "#stories" },
+  { label: "FAQ", href: "#faq" },
 ];
 
 // Philosophy section values

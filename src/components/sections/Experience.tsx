@@ -8,7 +8,7 @@ export function Experience() {
   const { ref, isInView } = useInView(0.2);
 
   return (
-    <section id="experience" ref={ref} className="py-32 px-6">
+    <section id="experience" ref={ref} className="pt-16 md:pt-20 pb-32 px-6">
       <div className="max-w-6xl mx-auto">
         <div
           className={`mb-20 transition-all duration-1000 ${
