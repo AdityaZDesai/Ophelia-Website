@@ -162,13 +162,13 @@ body {
   background-clip: text;
 }
 
-/* Smooth image loading - Next.js Image handles its own loading */
-img:not([data-nimg]) {
+/* Smooth image loading */
+img {
   opacity: 0;
   transition: opacity 0.5s ease;
 }
 
-img:not([data-nimg]).loaded {
+img.loaded {
   opacity: 1;
 }
 

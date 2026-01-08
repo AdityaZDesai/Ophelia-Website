@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn, signUp } from "@/lib/auth-client";
 import type { Personality } from "@/types";
 
@@ -17,6 +18,7 @@ export function AuthModal({
   selectedPersonality,
   onSuccess,
 }: AuthModalProps) {
+  const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,42 +33,111 @@ export function AuthModal({
     setLoading(true);
     setError(null);
 
+    console.log(`[AuthModal] handleSubmit started - mode: ${mode}, email: ${email}`);
+
     try {
       if (mode === "signup") {
+        // New user signing up - always go to onboarding
+        console.log(`[AuthModal] Starting sign up for email: ${email}`);
         const result = await signUp.email({
           email,
           password,
           name,
-          callbackURL: "/onboarding",
+        });
+        
+        console.log(`[AuthModal] Sign up result:`, { 
+          success: !result.error, 
+          error: result.error?.message,
+          hasData: !!result.data 
         });
         
         if (result.error) {
+          console.error(`[AuthModal] Sign up failed:`, result.error);
           setError(result.error.message || "Failed to sign up");
           return;
         }
+
+        console.log(`[AuthModal] Sign up successful, storing personality:`, selectedPersonality?.id);
+        // Store selected personality in session storage for onboarding
+        if (selectedPersonality) {
+          sessionStorage.setItem("selectedPersonality", selectedPersonality.id);
+        }
+
+        console.log(`[AuthModal] Redirecting new user to /onboarding`);
+        onSuccess();
+        router.push("/onboarding");
       } else {
+        // Existing user signing in - check if they've completed onboarding
+        console.log(`[AuthModal] Starting sign in for email: ${email}`);
         const result = await signIn.email({
           email,
           password,
-          callbackURL: "/onboarding",
+        });
+        
+        console.log(`[AuthModal] Sign in result:`, { 
+          success: !result.error, 
+          error: result.error?.message,
+          hasData: !!result.data 
         });
         
         if (result.error) {
+          console.error(`[AuthModal] Sign in failed:`, result.error);
           setError(result.error.message || "Failed to sign in");
           return;
         }
-      }
 
-      // Store selected personality in session storage for onboarding
-      if (selectedPersonality) {
-        sessionStorage.setItem("selectedPersonality", selectedPersonality.id);
-      }
+        console.log(`[AuthModal] Sign in successful, waiting for session to be available...`);
+        // Check if user has already completed onboarding from database
+        // Wait a bit for session to be available
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log(`[AuthModal] Checking user onboarding status from database...`);
+        try {
+          const statusResponse = await fetch("/api/user/status");
+          console.log(`[AuthModal] Status API response:`, { 
+            ok: statusResponse.ok, 
+            status: statusResponse.status 
+          });
+          
+          if (statusResponse.ok) {
+            const status = await statusResponse.json();
+            console.log(`[AuthModal] User status from database:`, {
+              onboardingCompleted: status.onboardingCompleted,
+              selectedPersonality: status.selectedPersonality,
+              communicationChannel: status.communicationChannel
+            });
+            
+            // If user has completed onboarding, redirect to chat
+            if (status.onboardingCompleted) {
+              console.log(`[AuthModal] User has completed onboarding, redirecting to /chat`);
+              onSuccess();
+              router.push("/chat");
+              return;
+            } else {
+              console.log(`[AuthModal] User has NOT completed onboarding`);
+            }
+          } else {
+            const errorData = await statusResponse.json().catch(() => ({}));
+            console.error(`[AuthModal] Status API error:`, { 
+              status: statusResponse.status, 
+              error: errorData 
+            });
+          }
+        } catch (statusError) {
+          console.error(`[AuthModal] Failed to check user status:`, statusError);
+          // If status check fails, default to onboarding
+        }
 
-      onSuccess();
+        console.log(`[AuthModal] Redirecting to /onboarding (user not completed onboarding or status check failed)`);
+        // Existing user but not completed onboarding - go to onboarding
+        onSuccess();
+        router.push("/onboarding");
+      }
     } catch (err) {
+      console.error(`[AuthModal] Unexpected error in handleSubmit:`, err);
       setError("An unexpected error occurred");
-      console.error(err);
     } finally {
+      console.log(`[AuthModal] handleSubmit completed, setting loading to false`);
       setLoading(false);
     }
   };
@@ -75,35 +146,84 @@ export function AuthModal({
     setLoading(true);
     setError(null);
     
+    console.log(`[AuthModal] handleSocialSignIn started - provider: ${provider}, hasPersonality: ${!!selectedPersonality}`);
+    
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/83f7ebfb-fb98-414f-a762-f20f439aa009',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthModal.tsx:handleSocialSignIn:entry',message:'Social sign-in started',data:{provider,hasPersonality:!!selectedPersonality},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'E'})}).catch(()=>{});
     // #endregion
     
     try {
       if (selectedPersonality) {
+        console.log(`[AuthModal] Storing selected personality in sessionStorage:`, selectedPersonality.id);
         sessionStorage.setItem("selectedPersonality", selectedPersonality.id);
       }
       
+      console.log(`[AuthModal] Calling signIn.social for provider: ${provider}`);
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/83f7ebfb-fb98-414f-a762-f20f439aa009',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthModal.tsx:handleSocialSignIn:before-signIn',message:'About to call signIn.social',data:{provider,callbackURL:'/onboarding'},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/83f7ebfb-fb98-414f-a762-f20f439aa009',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthModal.tsx:handleSocialSignIn:before-signIn',message:'About to call signIn.social',data:{provider},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
       
       await signIn.social({
         provider,
-        callbackURL: "/onboarding",
       });
       
+      console.log(`[AuthModal] signIn.social completed successfully for provider: ${provider}`);
       // #region agent log
       fetch('http://127.0.0.1:7242/ingest/83f7ebfb-fb98-414f-a762-f20f439aa009',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthModal.tsx:handleSocialSignIn:success',message:'signIn.social succeeded',data:{provider},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
+      
+      console.log(`[AuthModal] Waiting 500ms for session to be available...`);
+      // Check if user has already completed onboarding from database
+      // Wait a bit for session to be available
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log(`[AuthModal] Checking user onboarding status from database...`);
+      try {
+        const statusResponse = await fetch("/api/user/status");
+        console.log(`[AuthModal] Status API response:`, { 
+          ok: statusResponse.ok, 
+          status: statusResponse.status 
+        });
+        
+        if (statusResponse.ok) {
+          const status = await statusResponse.json();
+          console.log(`[AuthModal] User status from database:`, {
+            onboardingCompleted: status.onboardingCompleted,
+            selectedPersonality: status.selectedPersonality,
+            communicationChannel: status.communicationChannel
+          });
+          
+          // If user has completed onboarding, redirect to chat
+          if (status.onboardingCompleted) {
+            console.log(`[AuthModal] User has completed onboarding, redirecting to /chat`);
+            router.push("/chat");
+            return;
+          } else {
+            console.log(`[AuthModal] User has NOT completed onboarding`);
+          }
+        } else {
+          const errorData = await statusResponse.json().catch(() => ({}));
+          console.error(`[AuthModal] Status API error:`, { 
+            status: statusResponse.status, 
+            error: errorData 
+          });
+        }
+      } catch (statusError) {
+        console.error(`[AuthModal] Failed to check user status:`, statusError);
+        // If status check fails, default to onboarding
+      }
+
+      console.log(`[AuthModal] Redirecting to /onboarding (new user or not completed onboarding or status check failed)`);
+      // New user or not completed onboarding - go to onboarding
+      router.push("/onboarding");
     } catch (err) {
+      console.error(`[AuthModal] Error in handleSocialSignIn:`, err);
       // #region agent log
       const errorDetails = err instanceof Error ? {name:err.name,message:err.message,stack:err.stack?.substring(0,500)} : {raw:String(err)};
       fetch('http://127.0.0.1:7242/ingest/83f7ebfb-fb98-414f-a762-f20f439aa009',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthModal.tsx:handleSocialSignIn:error',message:'signIn.social failed',data:{provider,error:errorDetails},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{});
       // #endregion
       
       setError(`Failed to sign in with ${provider}`);
-      console.error(err);
       setLoading(false);
     }
   };
