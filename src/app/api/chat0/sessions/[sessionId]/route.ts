@@ -32,7 +32,7 @@ async function getAuthToken(): Promise<string | null> {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const token = await getAuthToken();
@@ -43,7 +43,7 @@ export async function GET(
       );
     }
 
-    const { sessionId } = params;
+    const { sessionId } = await params;
 
     const response = await fetch(`${FLASK_API_URL}/api/chat0/sessions/${sessionId}`, {
       method: "GET",
@@ -74,7 +74,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const token = await getAuthToken();
@@ -85,7 +85,7 @@ export async function PATCH(
       );
     }
 
-    const { sessionId } = params;
+    const { sessionId } = await params;
     const body = await request.json();
 
     const response = await fetch(`${FLASK_API_URL}/api/chat0/sessions/${sessionId}`, {
@@ -118,7 +118,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const token = await getAuthToken();
@@ -129,7 +129,7 @@ export async function DELETE(
       );
     }
 
-    const { sessionId } = params;
+    const { sessionId } = await params;
 
     const response = await fetch(`${FLASK_API_URL}/api/chat0/sessions/${sessionId}`, {
       method: "DELETE",

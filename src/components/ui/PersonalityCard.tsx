@@ -17,7 +17,7 @@ export function PersonalityCard({
     <button
       onClick={() => onSelect(personality)}
       className={`
-        group relative overflow-hidden rounded-2xl p-8 text-left transition-all duration-500
+        group flex flex-col overflow-hidden rounded-2xl text-left transition-all duration-500
         hover:scale-[1.02] hover:shadow-2xl
         ${isSelected 
           ? "ring-2 ring-offset-4 ring-offset-[#0a0a0a] shadow-2xl scale-[1.02]" 
@@ -32,40 +32,41 @@ export function PersonalityCard({
         ["--accent" as string]: personality.accentColor,
       }}
     >
-      {/* Gradient Background */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-br ${personality.gradient} opacity-80 transition-opacity duration-500 group-hover:opacity-100`}
-      />
-      
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-      
+      <div className="relative w-full aspect-[4/5] overflow-hidden">
+        <img
+          src={personality.image}
+          alt={personality.name}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+      </div>
+
       {/* Content */}
-      <div className="relative z-10 flex flex-col h-full min-h-[280px]">
+      <div className="flex flex-col min-h-[240px] p-6 bg-background">
         {/* Name & Tagline */}
-        <div className="mb-auto">
-          <h3 className="font-cormorant text-3xl md:text-4xl font-semibold text-white mb-2 tracking-tight">
+        <div className="mb-2">
+          <h3 className="font-cormorant text-3xl md:text-4xl font-semibold text-foreground mb-2 tracking-tight">
             {personality.name}
           </h3>
-          <p 
+          <p
             className="font-jakarta text-sm font-medium tracking-wider uppercase"
             style={{ color: personality.accentColor }}
           >
             {personality.tagline}
           </p>
         </div>
-        
+
         {/* Description */}
-        <p className="font-jakarta text-white/90 text-sm leading-relaxed mt-6">
+        <p className="font-jakarta text-text-muted text-sm leading-relaxed">
           {personality.description}
         </p>
-        
+
         {/* Selection Indicator */}
         <div className="mt-6 flex items-center gap-3">
           <div
             className={`
               w-5 h-5 rounded-full border-2 transition-all duration-300 flex items-center justify-center
-              ${isSelected ? "border-white bg-white" : "border-white/50"}
+              ${isSelected ? "border-foreground bg-foreground" : "border-foreground/40"}
             `}
           >
             {isSelected && (
@@ -85,12 +86,12 @@ export function PersonalityCard({
               </svg>
             )}
           </div>
-          <span className="font-jakarta text-white/70 text-sm">
+          <span className="font-jakarta text-text-muted text-sm">
             {isSelected ? "Selected" : "Choose me"}
           </span>
         </div>
       </div>
-    </button>
+
+      </button>
   );
 }
-

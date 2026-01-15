@@ -162,15 +162,6 @@ body {
   background-clip: text;
 }
 
-/* Smooth image loading */
-img {
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-img.loaded {
-  opacity: 1;
-}
 
 /* Focus states */
 a:focus-visible,
