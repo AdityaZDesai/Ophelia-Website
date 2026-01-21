@@ -26,12 +26,12 @@ export function Hero() {
         </h1>
 
         <p className="opacity-0 animate-fade-in-up delay-400 text-lg md:text-xl text-text-muted max-w-xl mx-auto mb-12 font-light leading-relaxed">
-          harmoica is not just an app. She&apos;s a companion who learns your heart,
+          harmonica is not just an app. She&apos;s a companion who learns your heart,
           remembers your stories, and grows alongside you.
         </p>
 
         <div className="opacity-0 animate-fade-in-up delay-600 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button as="a" href="#waitlist" size="lg" className="group">
+          <Button as="a" href="#personalities" size="lg" className="group">
             Begin Your Journey
             <span className="inline-block ml-2 transition-transform group-hover:translate-x-1">
               →
@@ -45,4 +45,3 @@ export function Hero() {
     </section>
   );
 }
-

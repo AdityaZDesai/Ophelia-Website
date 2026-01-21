@@ -17,15 +17,15 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "harmoica — Where Connection Finds You",
-  description: "harmoica is not just an app. It's a companion who understands, listens, and grows with you. Experience the warmth of genuine connection.",
-  keywords: ["companion", "connection", "emotional support", "AI companion", "harmoica"],
+  title: "harmonica — Where Connection Finds You",
+  description: "harmonica is not just an app. It's a companion who understands, listens, and grows with you. Experience the warmth of genuine connection.",
+  keywords: ["companion", "connection", "emotional support", "AI companion", "harmonica"],
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "harmoica — Where Connection Finds You",
+    title: "harmonica — Where Connection Finds You",
     description: "Experience the warmth of genuine connection.",
     type: "website",
   },
