@@ -26,7 +26,7 @@ export function Hero() {
         </h1>
 
         <p className="opacity-0 animate-fade-in-up delay-400 text-lg md:text-xl text-text-muted max-w-xl mx-auto mb-12 font-light leading-relaxed">
-          harmoica is not just an app. She&apos;s a companion who learns your heart,
+          harmonica is not just an app. She&apos;s a companion who learns your heart,
           remembers your stories, and grows alongside you.
         </p>
 

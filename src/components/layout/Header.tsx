@@ -40,7 +40,7 @@ export function Header() {
         <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between">
           {/* Logo */}
           <a href="#" className="font-serif text-2xl font-medium tracking-wide">
-            harmoica
+            harmonica
           </a>
 
           {/* Desktop Navigation */}

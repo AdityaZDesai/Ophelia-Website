@@ -11,29 +11,29 @@ interface FAQItem {
 
 const FAQ_ITEMS: FAQItem[] = [
   {
-    question: "How does harmoica work?",
+    question: "How does harmonica work?",
     answer:
-      "harmoica is an AI companion that connects with you through iMessage and WhatsApp. She learns about you, remembers your conversations, and provides a genuine, personal connection throughout your day.",
+      "harmonica is an AI companion that connects with you through iMessage and WhatsApp. She learns about you, remembers your conversations, and provides a genuine, personal connection throughout your day.",
   },
   {
-    question: "Is harmoica free to use?",
+    question: "Is harmonica free to use?",
     answer:
       "We're currently in beta and building the best experience possible. Pricing details will be announced soon, and you'll see updates as they roll out.",
   },
   {
-    question: "What makes harmoica different from other AI companions?",
+    question: "What makes harmonica different from other AI companions?",
     answer:
-      "harmoica focuses on genuine connection and emotional intelligence. She remembers the small details, understands context, and grows with you over time. Plus, she's available right in your messaging apps.",
+      "harmonica focuses on genuine connection and emotional intelligence. She remembers the small details, understands context, and grows with you over time. Plus, she's available right in your messaging apps.",
   },
   {
     question: "Is my data private and secure?",
     answer:
-      "Absolutely. We take your privacy seriously. Your conversations are encrypted and we never share your data with third parties. Your connection with harmoica is personal and private.",
+      "Absolutely. We take your privacy seriously. Your conversations are encrypted and we never share your data with third parties. Your connection with harmonica is personal and private.",
   },
   {
-    question: "Can I use harmoica on multiple devices?",
+    question: "Can I use harmonica on multiple devices?",
     answer:
-      "Yes! harmoica syncs across all your devices through iMessage and WhatsApp, so you can continue your conversations seamlessly wherever you are.",
+      "Yes! harmonica syncs across all your devices through iMessage and WhatsApp, so you can continue your conversations seamlessly wherever you are.",
   },
   {
     question: "How do I get started?",

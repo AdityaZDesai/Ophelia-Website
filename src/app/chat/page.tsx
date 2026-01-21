@@ -211,7 +211,7 @@ export default function ChatPage() {
               </div>
             </div>
             <div>
-              <h1 className="font-cormorant text-2xl text-white">harmoica</h1>
+              <h1 className="font-cormorant text-2xl text-white">harmonica</h1>
             </div>
           </div>
         </div>
