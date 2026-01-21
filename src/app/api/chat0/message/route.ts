@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const FLASK_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const FLASK_API_URL = process.env.harmonica_API_URL || "http://localhost:5000";
 
 async function getAuthToken(): Promise<string | null> {
   try {
