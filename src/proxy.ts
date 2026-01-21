@@ -10,8 +10,10 @@ const authPaths = ["/login", "/signup"];
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Check for session cookie (Better Auth uses this naming convention)
-  const sessionCookie = request.cookies.get("better-auth.session_token");
+  // Check for session cookie (secure cookies in production)
+  const sessionCookie =
+    request.cookies.get("__Secure-better-auth.session_token") ??
+    request.cookies.get("better-auth.session_token");
   const isAuthenticated = !!sessionCookie;
 
   // Check if current path is protected
@@ -53,4 +55,3 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-
