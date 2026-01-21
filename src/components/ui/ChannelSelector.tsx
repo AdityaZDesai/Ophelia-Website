@@ -39,7 +39,7 @@ export function ChannelSelector({
   onSelect,
 }: ChannelSelectorProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 max-w-4xl mx-auto">
       {channels.map((channel) => {
         const isSelected = selectedChannel === channel.id;
         
@@ -112,4 +112,3 @@ export function ChannelSelector({
     </div>
   );
 }
-

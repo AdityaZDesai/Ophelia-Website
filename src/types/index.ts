@@ -39,7 +39,7 @@ export interface Personality {
 }
 
 // Communication channel types
-export type CommunicationChannel = "imessage" | "whatsapp" | "web";
+export type CommunicationChannel = "imessage" | "web";
 
 export interface ChannelOption {
   id: CommunicationChannel;

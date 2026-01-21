@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const { communicationChannel, phone, selectedPersonality } = body;
 
     // Validate communication channel
-    if (!communicationChannel || !["imessage", "whatsapp", "web"].includes(communicationChannel)) {
+    if (!communicationChannel || !["imessage", "web"].includes(communicationChannel)) {
       return NextResponse.json(
         { error: "Invalid communication channel" },
         { status: 400 }
@@ -33,9 +33,9 @@ export async function POST(request: Request) {
     }
 
     // Validate phone if channel requires it
-    if ((communicationChannel === "imessage" || communicationChannel === "whatsapp") && !phone) {
+    if (communicationChannel === "imessage" && !phone) {
       return NextResponse.json(
-        { error: "Phone number is required for iMessage or WhatsApp" },
+        { error: "Phone number is required for iMessage" },
         { status: 400 }
       );
     }
@@ -67,4 +67,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

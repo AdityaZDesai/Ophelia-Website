@@ -13,7 +13,7 @@ const FAQ_ITEMS: FAQItem[] = [
   {
     question: "How does harmonica work?",
     answer:
-      "harmonica is an AI companion that connects with you through iMessage and WhatsApp. She learns about you, remembers your conversations, and provides a genuine, personal connection throughout your day.",
+      "harmonica is an AI companion that connects with you through iMessage and the web. She learns about you, remembers your conversations, and provides a genuine, personal connection throughout your day.",
   },
   {
     question: "Is harmonica free to use?",
@@ -33,12 +33,12 @@ const FAQ_ITEMS: FAQItem[] = [
   {
     question: "Can I use harmonica on multiple devices?",
     answer:
-      "Yes! harmonica syncs across all your devices through iMessage and WhatsApp, so you can continue your conversations seamlessly wherever you are.",
+      "Yes! harmonica syncs across all your devices through iMessage and the web, so you can continue your conversations seamlessly wherever you are.",
   },
   {
     question: "How do I get started?",
     answer:
-      "Sign in to choose your companion and complete onboarding. Once you're in, you can connect through iMessage, WhatsApp, or the web and start your journey.",
+      "Sign in to choose your companion and complete onboarding. Once you're in, you can connect through iMessage or the web and start your journey.",
   },
 ];
 

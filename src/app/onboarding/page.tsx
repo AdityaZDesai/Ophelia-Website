@@ -37,7 +37,7 @@ export default function OnboardingPage() {
 
   const personalityData = PERSONALITIES.find((p) => p.id === selectedPersonality);
 
-  const requiresPhone = selectedChannel === "imessage" || selectedChannel === "whatsapp";
+  const requiresPhone = selectedChannel === "imessage";
 
   const handleChannelSelect = (channel: CommunicationChannel) => {
     setSelectedChannel(channel);
@@ -96,8 +96,12 @@ export default function OnboardingPage() {
       // Clear session storage
       sessionStorage.removeItem("selectedPersonality");
 
-      // Redirect to dashboard/chat
-      router.push("/chat");
+      // Redirect based on selected channel
+      if (selectedChannel === "imessage") {
+        router.push("/imessage-chat");
+      } else {
+        router.push("/chat");
+      }
     } catch (error) {
       console.error("Onboarding error:", error);
       setPhoneError("Something went wrong. Please try again.");
@@ -213,7 +217,7 @@ export default function OnboardingPage() {
               </h2>
               <p className="font-jakarta text-white/60">
                 Enter your phone number so {personalityData?.name || "Ophelia"} can reach you on{" "}
-                {selectedChannel === "imessage" ? "iMessage" : "WhatsApp"}
+                iMessage
               </p>
             </div>
 
@@ -265,4 +269,3 @@ export default function OnboardingPage() {
     </main>
   );
 }
-

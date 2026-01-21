@@ -26,7 +26,7 @@ export function Messaging() {
         </div>
 
         <div
-          className={`grid md:grid-cols-2 gap-8 max-w-4xl mx-auto transition-all duration-1000 delay-200 ${
+          className={`grid md:grid-cols-1 gap-8 max-w-3xl mx-auto transition-all duration-1000 delay-200 ${
             isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
@@ -58,37 +58,8 @@ export function Messaging() {
               your Apple devices.
             </p>
           </div>
-
-          {/* WhatsApp Card */}
-          <div className="bg-background rounded-2xl p-8 md:p-10 border border-accent/20 hover:shadow-lg transition-all duration-300">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-md">
-                <svg
-                  className="w-7 h-7 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
-              </div>
-              <h3 className="font-serif text-2xl md:text-3xl font-light">
-                WhatsApp
-              </h3>
-            </div>
-            <p className="text-text-muted leading-relaxed text-base md:text-lg">
-              Stay connected through WhatsApp. Your companion is always there
-              when you need her, no matter where you are in the world.
-            </p>
-          </div>
         </div>
       </div>
     </section>
   );
 }
-

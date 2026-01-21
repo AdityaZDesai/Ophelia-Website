@@ -11,21 +11,42 @@ interface PhoneInputProps {
 export function PhoneInput({ value, onChange, error }: PhoneInputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
+  const getCountryCode = (inputValue: string) => {
+    const match = inputValue.match(/^\+(\d{1,3})/);
+    return match ? `+${match[1]}` : "+1";
+  };
+
+  const stripCountryCode = (inputValue: string) =>
+    inputValue.replace(/^\+\d+\s*/, "");
+
+  const selectedCountryCode = getCountryCode(value);
+  const localNumber = stripCountryCode(value);
+  const displayValue = localNumber
+    ? `${selectedCountryCode} ${localNumber}`
+    : `${selectedCountryCode} `;
+
   // Format phone number as user types
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value.replace(/\D/g, "");
-    
-    // Format as (XXX) XXX-XXXX for US numbers
-    let formatted = input;
-    if (input.length >= 6) {
-      formatted = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6, 10)}`;
-    } else if (input.length >= 3) {
-      formatted = `(${input.slice(0, 3)}) ${input.slice(3)}`;
-    } else if (input.length > 0) {
-      formatted = `(${input}`;
+    const countryCode = getCountryCode(value);
+    const rawValue = e.target.value;
+    const rawNumber = rawValue.startsWith(countryCode)
+      ? rawValue.slice(countryCode.length).trimStart()
+      : rawValue;
+    const digits = rawNumber.replace(/\D/g, "");
+
+    let formatted = digits;
+    if (countryCode === "+1") {
+      if (digits.length >= 6) {
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+      } else if (digits.length >= 3) {
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+      } else if (digits.length > 0) {
+        formatted = `(${digits}`;
+      }
     }
-    
-    onChange(formatted);
+
+    const nextValue = formatted ? `${countryCode} ${formatted}` : countryCode;
+    onChange(nextValue.trim());
   };
 
   return (
@@ -49,18 +70,13 @@ export function PhoneInput({ value, onChange, error }: PhoneInputProps) {
         <div className="flex items-center gap-2 pl-4 pr-3 py-3 border-r border-white/10">
           <select
             className="bg-transparent text-white/60 font-jakarta text-sm pr-1 focus:outline-none"
-            value={
-              value.startsWith("+44")
-                ? "+44"
-                : value.startsWith("+61")
-                ? "+61"
-                : value.startsWith("+1")
-                ? "+1"
-                : "+1"
-            }
+            value={selectedCountryCode}
             onChange={e => {
-              const currentNumber = value.replace(/^\+\d+\s*/, "");
-              onChange(`${e.target.value} ${currentNumber}`);
+              const currentNumber = stripCountryCode(value);
+              const nextValue = currentNumber
+                ? `${e.target.value} ${currentNumber}`
+                : e.target.value;
+              onChange(nextValue);
             }}
           >
             <option value="+1">🇺🇸 +1 (USA)</option>
@@ -74,11 +90,11 @@ export function PhoneInput({ value, onChange, error }: PhoneInputProps) {
         <input
           type="tel"
           placeholder="(555) 000-0000"
-          value={value}
+          value={displayValue}
           onChange={handleChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          maxLength={14}
+          maxLength={20}
           className="flex-1 px-4 py-3 bg-transparent text-white placeholder-white/30 font-jakarta text-sm focus:outline-none"
         />
         
@@ -115,4 +131,3 @@ export function PhoneInput({ value, onChange, error }: PhoneInputProps) {
     </div>
   );
 }
-
