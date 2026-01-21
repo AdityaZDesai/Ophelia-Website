@@ -18,7 +18,7 @@ const FAQ_ITEMS: FAQItem[] = [
   {
     question: "Is harmoica free to use?",
     answer:
-      "We're currently in beta and building the best experience possible. Pricing details will be announced soon. Join our waitlist to be notified when we launch.",
+      "We're currently in beta and building the best experience possible. Pricing details will be announced soon, and you'll see updates as they roll out.",
   },
   {
     question: "What makes harmoica different from other AI companions?",
@@ -38,7 +38,7 @@ const FAQ_ITEMS: FAQItem[] = [
   {
     question: "How do I get started?",
     answer:
-      "Simply join our waitlist and we'll notify you when harmoica is ready. Once available, you'll be able to connect through iMessage or WhatsApp and start your journey.",
+      "Sign in to choose your companion and complete onboarding. Once you're in, you can connect through iMessage, WhatsApp, or the web and start your journey.",
   },
 ];
 
@@ -121,4 +121,3 @@ export function FAQ() {
     </section>
   );
 }
-

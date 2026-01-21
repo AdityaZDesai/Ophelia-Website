@@ -10,7 +10,6 @@ import {
   Personalities,
   Experience,
   Stories,
-  Waitlist,
   FAQ,
 } from "@/components/sections";
 
@@ -56,7 +55,6 @@ export default function Home() {
       <Personalities />
       <Experience />
       <Stories />
-      <Waitlist />
       <FAQ />
       <Footer />
     </main>

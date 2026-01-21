@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, signUp } from "@/lib/auth-client";
 import type { Personality } from "@/types";
@@ -10,6 +10,8 @@ interface AuthModalProps {
   onClose: () => void;
   selectedPersonality: Personality | null;
   onSuccess: () => void;
+  initialMode?: "signin" | "signup";
+  allowModeSwitch?: boolean;
 }
 
 export function AuthModal({
@@ -17,14 +19,22 @@ export function AuthModal({
   onClose,
   selectedPersonality,
   onSuccess,
+  initialMode = "signup",
+  allowModeSwitch = true,
 }: AuthModalProps) {
   const router = useRouter();
-  const [mode, setMode] = useState<"signin" | "signup">("signup");
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+    }
+  }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
 
@@ -364,18 +374,19 @@ export function AuthModal({
           </form>
 
           {/* Toggle Mode */}
-          <p className="text-center mt-6 font-jakarta text-sm text-white/60">
-            {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button
-              onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
-              className="text-white hover:underline"
-            >
-              {mode === "signup" ? "Sign in" : "Sign up"}
-            </button>
-          </p>
+          {allowModeSwitch && (
+            <p className="text-center mt-6 font-jakarta text-sm text-white/60">
+              {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
+              <button
+                onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+                className="text-white hover:underline"
+              >
+                {mode === "signup" ? "Sign in" : "Sign up"}
+              </button>
+            </p>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

@@ -31,7 +31,7 @@ export function Hero() {
         </p>
 
         <div className="opacity-0 animate-fade-in-up delay-600 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button as="a" href="#waitlist" size="lg" className="group">
+          <Button as="a" href="#personalities" size="lg" className="group">
             Begin Your Journey
             <span className="inline-block ml-2 transition-transform group-hover:translate-x-1">
               →
@@ -45,4 +45,3 @@ export function Hero() {
     </section>
   );
 }
-
