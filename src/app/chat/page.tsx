@@ -89,7 +89,11 @@ export default function ChatPage() {
           const formattedMessages: ChatMessage[] = session.history.map((msg: any) => ({
             role: msg.role as "user" | "assistant",
             content: msg.content,
-            images: msg.images || [],
+            images: normalizeImages({
+              image: msg.image,
+              images: msg.images,
+              attachments: msg.attachments,
+            }),
           }));
           setMessages(formattedMessages);
         }
@@ -115,6 +119,29 @@ export default function ChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const normalizeImages = (data: {
+    image?: MessageResponse["image"];
+    images?: MessageResponse["images"];
+    attachments?: MessageResponse["attachments"];
+  }): string[] | undefined => {
+    const imageUrl =
+      typeof data.image === "string"
+        ? data.image
+        : data.image && typeof data.image === "object"
+        ? data.image.url
+        : undefined;
+
+    const images = data.images?.filter((img) => typeof img === "string") || [];
+    const attachments =
+      data.attachments?.filter((attachment) => typeof attachment === "string") || [];
+
+    const allImages = [imageUrl, ...images, ...attachments].filter(
+      (img): img is string => typeof img === "string" && img.length > 0
+    );
+
+    return allImages.length > 0 ? allImages : undefined;
+  };
 
   const handleSend = async () => {
     if (!input.trim() || !chatSession || loading) return;
@@ -142,11 +169,7 @@ export default function ChatPage() {
       const assistantMsg: ChatMessage = {
         role: "assistant",
         content: response.reply,
-        images: response.image
-          ? [response.image]
-          : response.images
-          ? response.images
-          : undefined,
+        images: normalizeImages(response),
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
@@ -265,7 +288,8 @@ export default function ChatPage() {
                       <div className="mt-3 space-y-2">
                         {msg.images.map((img, imgIdx) => (
                           <div key={imgIdx} className="rounded-lg overflow-hidden">
-                            {img.startsWith("data:image") || img.startsWith("http") ? (
+                            {typeof img === "string" &&
+                            (img.startsWith("data:image") || img.startsWith("http")) ? (
                               <img
                                 src={img}
                                 alt={`Image ${imgIdx + 1}`}

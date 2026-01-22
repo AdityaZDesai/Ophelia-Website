@@ -23,6 +23,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const { communicationChannel, phone, selectedPersonality } = body;
+    const normalizedPhone = typeof phone === "string" ? phone.replace(/\s+/g, "") : phone;
 
     // Validate communication channel
     if (!communicationChannel || !["imessage", "web"].includes(communicationChannel)) {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     }
 
     // Validate phone if channel requires it
-    if (communicationChannel === "imessage" && !phone) {
+    if (communicationChannel === "imessage" && !normalizedPhone) {
       return NextResponse.json(
         { error: "Phone number is required for iMessage" },
         { status: 400 }
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
 
     await pool.query(updateQuery, [
       communicationChannel,
-      communicationChannel === "web" ? null : phone,
+      communicationChannel === "web" ? null : normalizedPhone,
       selectedPersonality || null,
       session.user.id,
     ]);

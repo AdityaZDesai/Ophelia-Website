@@ -10,7 +10,13 @@ export interface ChatSession {
   user_id: string;
   name: string;
   persona: string;
-  history: Array<{ role: string; content: string }>;
+  history: Array<{
+    role: string;
+    content: string;
+    image?: MessageResponse["image"];
+    images?: MessageResponse["images"];
+    attachments?: MessageResponse["attachments"];
+  }>;
   created_at: string;
   updated_at: string;
   audio_enabled: boolean;
@@ -28,8 +34,15 @@ export interface MessageResponse {
     url: string;
     filename: string;
   };
-  image?: string; // URL or base64
+  image?:
+    | string
+    | {
+        url: string;
+        prompt?: string;
+        requested?: string | boolean;
+      };
   images?: string[]; // Array of image URLs or base64
+  attachments?: string[];
 }
 
 export interface CreateSessionRequest {
@@ -181,4 +194,3 @@ export async function deleteSession(sessionId: string): Promise<void> {
     throw new Error(error.error || "Failed to delete session");
   }
 }
-
