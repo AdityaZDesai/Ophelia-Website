@@ -135,6 +135,11 @@ body {
   animation: gradient-shift 8s ease infinite;
 }
 
+/* Safe area helpers */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Stagger delays */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }

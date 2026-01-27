@@ -202,7 +202,7 @@ export default function ChatPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] flex flex-col">
+    <main className="min-h-[100dvh] bg-[#0a0a0a] flex flex-col">
       {/* Header */}
       <div className="border-b border-white/10 bg-[#0a0a0a]/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-6 py-4">
@@ -241,8 +241,8 @@ export default function ChatPage() {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 lg:py-10 pb-32 sm:pb-36 lg:pb-40">
           {messages.length === 0 ? (
             <div className="text-center mt-20">
               <div
@@ -270,7 +270,7 @@ export default function ChatPage() {
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-2xl p-4 ${
+                    className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-4 ${
                       msg.role === "user"
                         ? "bg-white/10 text-white"
                         : "bg-white/5 text-white/90 border border-white/10"
@@ -344,8 +344,8 @@ export default function ChatPage() {
       )}
 
       {/* Input Area */}
-      <div className="border-t border-white/10 bg-[#0a0a0a]/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+      <div className="border-t border-white/10 bg-[#0a0a0a]/90 backdrop-blur-sm sticky bottom-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-8 sm:pb-7 lg:pb-8 safe-bottom">
           <div className="flex gap-3">
             <input
               type="text"
