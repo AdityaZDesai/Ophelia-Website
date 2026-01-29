@@ -53,16 +53,19 @@ export async function GET(
       },
     });
 
-    const data = await response.json();
+     const data = await response.json();
 
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: data.error || "Failed to fetch session" },
-        { status: response.status }
-      );
-    }
+     if (!response.ok) {
+       return NextResponse.json(
+         { error: data.error || "Failed to fetch session" },
+         { status: response.status }
+       );
+     }
 
-    return NextResponse.json(data);
+     console.log("[Chat0][GetSession] Full session payload:");
+     console.dir(data, { depth: null });
+
+     return NextResponse.json(data);
   } catch (error) {
     console.error("Error fetching session:", error);
     return NextResponse.json(
@@ -157,4 +160,3 @@ export async function DELETE(
     );
   }
 }
-

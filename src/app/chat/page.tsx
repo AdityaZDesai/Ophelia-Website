@@ -139,8 +139,9 @@ export default function ChatPage() {
     const allImages = [imageUrl, ...images, ...attachments].filter(
       (img): img is string => typeof img === "string" && img.length > 0
     );
+    const uniqueImages = Array.from(new Set(allImages));
 
-    return allImages.length > 0 ? allImages : undefined;
+    return uniqueImages.length > 0 ? uniqueImages : undefined;
   };
 
   const handleSend = async () => {
