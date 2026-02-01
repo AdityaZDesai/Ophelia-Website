@@ -21,15 +21,15 @@ const PORT = Number(process.env.PORT || 8081);
 const CHAT0_API_BASE_URL = process.env.CHAT0_API_BASE_URL || "http://localhost:5000";
 const CHAT0_API_TOKEN = process.env.CHAT0_API_TOKEN || "";
 const CHAT0_DEFAULT_PERSONA = process.env.CHAT0_DEFAULT_PERSONA || "";
+const WHATSAPP_API_BASE_URL =
+  process.env.WHATSAPP_API_BASE_URL || CHAT0_API_BASE_URL || "http://localhost:5000";
+const WHATSAPP_TO_ALIAS = process.env.WHATSAPP_TO_ALIAS || "";
 const WHATSAPP_AUTH_DIR = process.env.WHATSAPP_AUTH_DIR || "./data/auth";
-const SESSION_STORE_PATH = process.env.SESSION_STORE_PATH || "./data/sessions.json";
 const QR_IMAGE_PATH = process.env.QR_IMAGE_PATH || "./data/qr.png";
 const ALLOW_GROUPS = (process.env.ALLOW_GROUPS || "false").toLowerCase() === "true";
 
 let socket: WASocket | null = null;
 let isStarting = false;
-
-type SessionStore = Record<string, string>;
 
 function formatError(error: unknown) {
   if (error instanceof Error) {
@@ -53,79 +53,63 @@ async function ensureDir(filePath: string) {
   await fs.mkdir(dir, { recursive: true });
 }
 
-async function readSessionStore(): Promise<SessionStore> {
-  try {
-    const data = await fs.readFile(SESSION_STORE_PATH, "utf8");
-    return JSON.parse(data) as SessionStore;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return {};
-    }
-    throw error;
+function jidToWhatsAppAlias(jid: string) {
+  if (jid.endsWith("@s.whatsapp.net")) {
+    const digits = jid.split("@", 1)[0].replace(/\D+/g, "");
+    return `${digits}@whatsapp`;
   }
+  return jid;
 }
 
-async function writeSessionStore(store: SessionStore) {
-  await ensureDir(SESSION_STORE_PATH);
-  const payload = JSON.stringify(store, null, 2);
-  await fs.writeFile(SESSION_STORE_PATH, payload, "utf8");
+function resolveFromJid(message: proto.IWebMessageInfo) {
+  const participant = message.key.participant;
+  if (participant && participant.endsWith("@s.whatsapp.net")) {
+    return jidToWhatsAppAlias(participant);
+  }
+  if (message.key.remoteJid) {
+    return jidToWhatsAppAlias(message.key.remoteJid);
+  }
+  return "unknown@whatsapp";
 }
 
-async function getSessionId(jid: string): Promise<string | null> {
-  const store = await readSessionStore();
-  return store[jid] || null;
+function resolveToAlias() {
+  if (WHATSAPP_TO_ALIAS) return WHATSAPP_TO_ALIAS;
+  if (socket?.user?.id) return jidToWhatsAppAlias(socket.user.id);
+  return "companion@whatsapp";
 }
 
-async function setSessionId(jid: string, sessionId: string) {
-  const store = await readSessionStore();
-  store[jid] = sessionId;
-  await writeSessionStore(store);
-}
+type WhatsAppBackendResponse = {
+  reply?: string;
+  handled?: boolean;
+  session_id?: string;
+  attachments?: string[];
+  voice_note?: { url?: string };
+};
 
-async function createChatSession(name?: string): Promise<string> {
-  const body: Record<string, unknown> = {};
-  if (name) body.name = name;
-  if (CHAT0_DEFAULT_PERSONA) body.persona = CHAT0_DEFAULT_PERSONA;
-
+async function sendWhatsAppToBackend(payload: {
+  from: string;
+  to: string;
+  text: string;
+  timestamp: number;
+  metadata: { jid?: string; push_name?: string; message_id?: string };
+}): Promise<WhatsAppBackendResponse> {
   try {
-    const response = await fetch(`${CHAT0_API_BASE_URL}/api/chat0/sessions`, {
+    const response = await fetch(`${WHATSAPP_API_BASE_URL}/api/whatsapp/message`, {
       method: "POST",
       headers: withAuthHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json();
     if (!response.ok) {
       throw new Error(
-        data.error || data.message || `Failed to create session (${response.status})`
+        data.error || data.message || `Failed to send WhatsApp message (${response.status})`
       );
     }
 
-    return data.session?.session_id as string;
+    return data as WhatsAppBackendResponse;
   } catch (error) {
-    log.error({ error: formatError(error) }, "Create session failed");
-    throw error;
-  }
-}
-
-async function sendChatMessage(sessionId: string, message: string): Promise<string> {
-  try {
-    const response = await fetch(`${CHAT0_API_BASE_URL}/api/chat0/message`, {
-      method: "POST",
-      headers: withAuthHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify({ session_id: sessionId, message, generate_audio: false }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(
-        data.error || data.message || `Failed to send message (${response.status})`
-      );
-    }
-
-    return data.reply as string;
-  } catch (error) {
-    log.error({ error: formatError(error) }, "Send message failed");
+    log.error({ error: formatError(error) }, "WhatsApp backend call failed");
     throw error;
   }
 }
@@ -218,15 +202,54 @@ async function startSocket() {
       }
 
       try {
-        let sessionId = await getSessionId(remoteJid);
-        if (!sessionId) {
-          sessionId = await createChatSession(message.pushName || undefined);
-          await setSessionId(remoteJid, sessionId);
+        const payload = {
+          from: resolveFromJid(message),
+          to: resolveToAlias(),
+          text,
+          timestamp: Math.floor(Date.now() / 1000),
+          metadata: {
+            jid: remoteJid,
+            push_name: message.pushName || undefined,
+            message_id: message.key.id || undefined,
+          },
+        };
+
+        const result = await sendWhatsAppToBackend(payload);
+        if (!result.handled) {
+          continue;
         }
 
-        const reply = await sendChatMessage(sessionId, text);
-        if (reply) {
-          await socket?.sendMessage(remoteJid, { text: reply });
+        const attachments = Array.isArray(result.attachments)
+          ? result.attachments.filter(Boolean)
+          : [];
+        const voiceUrl = result.voice_note?.url || "";
+        const replyText = result.reply || "";
+
+        let sentMedia = false;
+
+        if (attachments.length > 0) {
+          for (let index = 0; index < attachments.length; index += 1) {
+            const url = attachments[index];
+            const caption = index === 0 && replyText ? replyText : undefined;
+            await socket?.sendMessage(remoteJid, {
+              image: { url },
+              ...(caption ? { caption } : {}),
+            });
+          }
+          sentMedia = true;
+        }
+
+        if (voiceUrl) {
+          await socket?.sendMessage(remoteJid, {
+            audio: { url: voiceUrl },
+            mimetype: "audio/mpeg",
+            ptt: true,
+          });
+          sentMedia = true;
+        }
+
+        if (!sentMedia && replyText) {
+          await socket?.sendMessage(remoteJid, { text: replyText });
         }
       } catch (error) {
         log.error(
@@ -269,6 +292,64 @@ app.post("/send", async (req: Request, res: Response) => {
   } catch (error) {
     log.error({ error }, "Failed to send message");
     return res.status(500).json({ error: "Failed to send message" });
+  }
+});
+
+app.post("/send-media", async (req: Request, res: Response) => {
+  const { to, image_url, caption, attachments, voice_url } = req.body as {
+    to?: string;
+    image_url?: string;
+    caption?: string;
+    attachments?: string[];
+    voice_url?: string;
+  };
+
+  if (!to) {
+    return res.status(400).json({ error: "Missing to" });
+  }
+
+  const mediaUrls = [
+    ...(Array.isArray(attachments) ? attachments : []),
+    ...(image_url ? [image_url] : []),
+  ].filter(Boolean);
+
+  if (mediaUrls.length === 0 && !voice_url) {
+    return res.status(400).json({ error: "No media to send" });
+  }
+
+  if (!socket) {
+    return res.status(503).json({ error: "WhatsApp socket not ready" });
+  }
+
+  try {
+    const jid = normalizeJid(to);
+    let sentCount = 0;
+
+    if (mediaUrls.length > 0) {
+      for (let index = 0; index < mediaUrls.length; index += 1) {
+        const url = mediaUrls[index];
+        const imageCaption = index === 0 && caption ? caption : undefined;
+        await socket.sendMessage(jid, {
+          image: { url },
+          ...(imageCaption ? { caption: imageCaption } : {}),
+        });
+        sentCount += 1;
+      }
+    }
+
+    if (voice_url) {
+      await socket.sendMessage(jid, {
+        audio: { url: voice_url },
+        mimetype: "audio/mpeg",
+        ptt: true,
+      });
+      sentCount += 1;
+    }
+
+    return res.json({ ok: true, to: jid, sent: sentCount });
+  } catch (error) {
+    log.error({ error: formatError(error) }, "Failed to send media");
+    return res.status(500).json({ error: "Failed to send media" });
   }
 });
 

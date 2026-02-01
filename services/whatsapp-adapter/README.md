@@ -26,9 +26,10 @@ On first run, scan the QR in the console with WhatsApp (Linked Devices).
 
 ## Environment
 
-- `CHAT0_API_BASE_URL`: Base URL for the Flask backend (e.g. `http://localhost:5000`).
-- `CHAT0_API_TOKEN`: Optional bearer token for backend auth.
-- `CHAT0_DEFAULT_PERSONA`: Optional persona for new sessions.
+- `WHATSAPP_API_BASE_URL`: Base URL for the Flask backend (e.g. `http://localhost:5000`).
+- `WHATSAPP_TO_ALIAS`: Optional alias for the companion (e.g. `companion@whatsapp`).
+- `CHAT0_API_TOKEN`: Optional bearer token for backend auth (not required for WhatsApp endpoint).
+- `CHAT0_DEFAULT_PERSONA`: Optional persona for new sessions (unused by WhatsApp endpoint).
 - `WHATSAPP_AUTH_DIR`: Directory to store WhatsApp auth state.
 - `SESSION_STORE_PATH`: File path for WhatsApp JID to session mapping.
 - `ALLOW_GROUPS`: Set `true` to respond in group chats.
@@ -37,7 +38,7 @@ On first run, scan the QR in the console with WhatsApp (Linked Devices).
 ## Endpoints
 
 - `GET /health` - basic status
-- `POST /send` - send a WhatsApp message
+- `POST /send` - send a WhatsApp message directly
 
 Request body:
 

@@ -26,11 +26,9 @@ Notes:
 
 1. A user sends a WhatsApp message to the linked account.
 2. The adapter receives the message event.
-3. The adapter maps the WhatsApp sender (JID) to a Chat0 session ID.
-   - If none exists, it creates a new session in Chat0.
-4. The adapter sends the message text to Chat0 via `/api/chat0/message`.
-5. Chat0 returns a reply.
-6. The adapter sends the reply back to the same WhatsApp chat.
+3. The adapter forwards the message to `POST /api/whatsapp/message`.
+4. The backend resolves the user, creates/reuses a Chat0 session, and returns a response.
+5. The adapter sends the reply back to the same WhatsApp chat.
 
 ## Message Flow (Outbound)
 
@@ -38,9 +36,60 @@ Notes:
 2. The adapter sends a WhatsApp message to the specified JID or phone.
 3. If the recipient replies, the inbound flow above triggers and the adapter replies via Chat0.
 
-## WhatsApp-Specific Endpoint Proposal
+## Adapter Send-Media Endpoint
 
-If you want a dedicated WhatsApp endpoint on the backend, implement:
+`POST http://localhost:8081/send-media`
+
+Use this endpoint when you want Celery (or any backend worker) to send images or voice notes directly through the adapter.
+
+**Payload (single image + optional caption)**
+```json
+{
+  "to": "15551234567",
+  "image_url": "https://cdn.example.com/image.png",
+  "caption": "Optional text"
+}
+```
+
+**Payload (multiple images + optional caption)**
+```json
+{
+  "to": "15551234567",
+  "attachments": [
+    "https://cdn.example.com/1.png",
+    "https://cdn.example.com/2.png"
+  ],
+  "caption": "Only used on first image"
+}
+```
+
+**Payload (voice note only)**
+```json
+{
+  "to": "15551234567",
+  "voice_url": "https://cdn.example.com/voice.mp3"
+}
+```
+
+**Payload (images + voice note)**
+```json
+{
+  "to": "15551234567",
+  "attachments": [
+    "https://cdn.example.com/1.png"
+  ],
+  "caption": "Only used on first image",
+  "voice_url": "https://cdn.example.com/voice.mp3"
+}
+```
+
+Notes:
+- `to` can be a raw phone number or a WhatsApp JID (e.g., `15551234567@s.whatsapp.net`).
+- `attachments` are treated as image URLs. The first image gets the caption, if provided.
+- `voice_url` is sent as an MP3 voice note.
+- No auth headers are required by default.
+
+## WhatsApp-Specific Endpoint
 
 `POST /api/whatsapp/message`
 
@@ -64,7 +113,13 @@ If you want a dedicated WhatsApp endpoint on the backend, implement:
 {
   "reply": "Hey! How are you?",
   "session_id": "...",
-  "handled": true
+  "handled": true,
+  "attachments": [
+    "https://.../image.png"
+  ],
+  "voice_note": {
+    "url": "https://.../voice.mp3"
+  }
 }
 ```
 
@@ -75,6 +130,37 @@ If you want a dedicated WhatsApp endpoint on the backend, implement:
 - Resolve or create a Chat0 session ID per WhatsApp contact.
 - Call Chat0 core (`/api/chat0/message`) with the message content.
 - Return the reply to the adapter.
+
+## Implemented Endpoint
+
+Behavior:
+- Accepts the request payload shown above (Option A).
+- Bypasses Better Auth and instead checks that the inbound number maps to a user in the database.
+- Creates or reuses a Chat0 session for that user and returns `{ reply, session_id, handled }`.
+- Returns `attachments` and `voice_note` so the adapter can send images/audio.
+- Ignores duplicates when `metadata.message_id` repeats within the TTL window.
+
+Adapter handling:
+- Sends `attachments` as image messages. The first image uses `reply` as its caption.
+- Sends `voice_note.url` as a WhatsApp voice note (MP3).
+- If no media is present, sends `reply` as a text message.
+
+Example curl:
+```bash
+curl -X POST http://localhost:5000/api/whatsapp/message \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from": "15551234567@whatsapp",
+    "to": "companion@whatsapp",
+    "text": "Hello",
+    "timestamp": 1700000000,
+    "metadata": {
+      "jid": "15551234567@s.whatsapp.net",
+      "push_name": "Alex",
+      "message_id": "ABC123"
+    }
+  }'
+```
 
 ### Optional enhancements
 
@@ -95,7 +181,7 @@ Use one of:
 ## Operational Notes
 
 - The adapter should run in its own process or container.
-- Persist auth state and the WhatsApp JID -> session mapping.
+- Persist auth state in the adapter so re-linking is not required.
 - Monitor `connection.update` events and handle logged-out cases.
 
 ## Relevant Files
