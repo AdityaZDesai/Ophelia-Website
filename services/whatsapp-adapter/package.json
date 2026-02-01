@@ -1,0 +1,25 @@
+{
+  "name": "whatsapp-adapter",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.17.16",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pino": "^9.2.0",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
