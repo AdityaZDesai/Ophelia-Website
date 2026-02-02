@@ -130,6 +130,33 @@ function normalizeJid(input: string) {
   return `${digitsOnly}@s.whatsapp.net`;
 }
 
+function getAudioMeta(url: string) {
+  let ext = "";
+  try {
+    const parsed = new URL(url);
+    ext = path.extname(parsed.pathname).toLowerCase();
+  } catch {
+    ext = path.extname(url).toLowerCase();
+  }
+
+  switch (ext) {
+    case ".ogg":
+    case ".opus":
+      return {
+        mimetype: "audio/ogg; codecs=opus",
+        fileName: `voice${ext || ".ogg"}`,
+        ptt: true,
+      };
+    case ".m4a":
+      return { mimetype: "audio/mp4", fileName: "voice.m4a", ptt: false };
+    case ".wav":
+      return { mimetype: "audio/wav", fileName: "voice.wav", ptt: false };
+    case ".mp3":
+    default:
+      return { mimetype: "audio/mpeg", fileName: "voice.mp3", ptt: false };
+  }
+}
+
 async function startSocket() {
   if (isStarting) return;
   isStarting = true;
@@ -240,10 +267,12 @@ async function startSocket() {
         }
 
         if (voiceUrl) {
+          const audioMeta = getAudioMeta(voiceUrl);
           await socket?.sendMessage(remoteJid, {
             audio: { url: voiceUrl },
-            mimetype: "audio/mpeg",
-            ptt: true,
+            mimetype: audioMeta.mimetype,
+            fileName: audioMeta.fileName,
+            ptt: audioMeta.ptt,
           });
           sentMedia = true;
         }
@@ -338,10 +367,12 @@ app.post("/send-media", async (req: Request, res: Response) => {
     }
 
     if (voice_url) {
+      const audioMeta = getAudioMeta(voice_url);
       await socket.sendMessage(jid, {
         audio: { url: voice_url },
-        mimetype: "audio/mpeg",
-        ptt: true,
+        mimetype: audioMeta.mimetype,
+        fileName: audioMeta.fileName,
+        ptt: audioMeta.ptt,
       });
       sentCount += 1;
     }
