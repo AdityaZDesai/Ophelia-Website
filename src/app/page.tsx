@@ -17,6 +17,17 @@ function AuthRedirect() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
 
+  const getRedirectForChannel = (channel?: string | null) => {
+    switch (channel) {
+      case "imessage":
+        return "/imessage-chat";
+      case "whatsapp":
+        return "/whatsapp-chat";
+      default:
+        return "/chat";
+    }
+  };
+
   useEffect(() => {
     if (isPending || !session) return;
 
@@ -30,7 +41,7 @@ function AuthRedirect() {
 
         const status = await response.json();
         if (status?.onboardingCompleted) {
-          router.push("/chat");
+          router.push(getRedirectForChannel(status.communicationChannel));
         } else {
           router.push("/onboarding");
         }

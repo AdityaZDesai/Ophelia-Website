@@ -24,9 +24,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { communicationChannel, phone, selectedPersonality } = body;
     const normalizedPhone = typeof phone === "string" ? phone.replace(/\s+/g, "") : phone;
+    const authCode =
+      communicationChannel === "whatsapp"
+        ? Math.floor(100000 + Math.random() * 900000).toString()
+        : null;
+    const verified = communicationChannel === "whatsapp" ? false : null;
 
     // Validate communication channel
-    if (!communicationChannel || !["imessage", "web"].includes(communicationChannel)) {
+    if (!communicationChannel || !["imessage", "web", "whatsapp"].includes(communicationChannel)) {
       return NextResponse.json(
         { error: "Invalid communication channel" },
         { status: 400 }
@@ -34,9 +39,9 @@ export async function POST(request: Request) {
     }
 
     // Validate phone if channel requires it
-    if (communicationChannel === "imessage" && !normalizedPhone) {
+    if (communicationChannel !== "web" && !normalizedPhone) {
       return NextResponse.json(
-        { error: "Phone number is required for iMessage" },
+        { error: "Phone number is required for this channel" },
         { status: 400 }
       );
     }
@@ -48,7 +53,9 @@ export async function POST(request: Request) {
         "communicationChannel" = $1,
         "phone" = $2,
         "selectedPersonality" = $3,
-        "onboardingCompleted" = true
+        "onboardingCompleted" = true,
+        "auth_code" = $5,
+        "verified" = $6
       WHERE "id" = $4
     `;
 
@@ -57,9 +64,11 @@ export async function POST(request: Request) {
       communicationChannel === "web" ? null : normalizedPhone,
       selectedPersonality || null,
       session.user.id,
+      authCode,
+      verified,
     ]);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, authCode });
   } catch (error) {
     console.error("Onboarding error:", error);
     return NextResponse.json(

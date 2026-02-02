@@ -125,8 +125,23 @@ function extractText(message: proto.IMessage | null | undefined) {
 }
 
 function normalizeJid(input: string) {
-  if (input.includes("@")) return input;
-  const digitsOnly = input.replace(/\D+/g, "");
+  const trimmed = input.trim();
+  if (trimmed.endsWith("@whatsapp")) {
+    const digits = trimmed.split("@", 1)[0].replace(/\D+/g, "");
+    return `${digits}@s.whatsapp.net`;
+  }
+  if (
+    trimmed.endsWith("@s.whatsapp.net") ||
+    trimmed.endsWith("@g.us") ||
+    trimmed.endsWith("@broadcast")
+  ) {
+    return trimmed;
+  }
+  if (trimmed.includes("@")) {
+    const digits = trimmed.split("@", 1)[0].replace(/\D+/g, "");
+    return digits ? `${digits}@s.whatsapp.net` : trimmed;
+  }
+  const digitsOnly = trimmed.replace(/\D+/g, "");
   return `${digitsOnly}@s.whatsapp.net`;
 }
 
@@ -229,6 +244,16 @@ async function startSocket() {
       }
 
       try {
+        log.info(
+          {
+            remoteJid,
+            from: resolveFromJid(message),
+            messageId: message.key.id || undefined,
+            pushName: message.pushName || undefined,
+            textPreview: text.slice(0, 160),
+          },
+          "Inbound WhatsApp message"
+        );
         const payload = {
           from: resolveFromJid(message),
           to: resolveToAlias(),
@@ -241,8 +266,20 @@ async function startSocket() {
           },
         };
 
+        log.info(
+          {
+            remoteJid,
+            to: payload.to,
+            messageId: payload.metadata.message_id,
+          },
+          "Forwarding WhatsApp message to backend"
+        );
         const result = await sendWhatsAppToBackend(payload);
         if (!result.handled) {
+          log.info(
+            { remoteJid, messageId: payload.metadata.message_id },
+            "Backend did not handle message"
+          );
           continue;
         }
 
@@ -252,12 +289,32 @@ async function startSocket() {
         const voiceUrl = result.voice_note?.url || "";
         const replyText = result.reply || "";
 
+        log.info(
+          {
+            remoteJid,
+            messageId: payload.metadata.message_id,
+            attachments: attachments.length,
+            hasVoiceNote: Boolean(voiceUrl),
+            replyPreview: replyText ? replyText.slice(0, 160) : undefined,
+          },
+          "Preparing WhatsApp response"
+        );
+
         let sentMedia = false;
 
         if (attachments.length > 0) {
           for (let index = 0; index < attachments.length; index += 1) {
             const url = attachments[index];
             const caption = index === 0 && replyText ? replyText : undefined;
+            log.info(
+              {
+                remoteJid,
+                index: index + 1,
+                total: attachments.length,
+                hasCaption: Boolean(caption),
+              },
+              "Sending WhatsApp image"
+            );
             await socket?.sendMessage(remoteJid, {
               image: { url },
               ...(caption ? { caption } : {}),
@@ -268,6 +325,10 @@ async function startSocket() {
 
         if (voiceUrl) {
           const audioMeta = getAudioMeta(voiceUrl);
+          log.info(
+            { remoteJid, mimetype: audioMeta.mimetype, ptt: audioMeta.ptt },
+            "Sending WhatsApp voice note"
+          );
           await socket?.sendMessage(remoteJid, {
             audio: { url: voiceUrl },
             mimetype: audioMeta.mimetype,
@@ -278,7 +339,15 @@ async function startSocket() {
         }
 
         if (!sentMedia && replyText) {
+          log.info(
+            { remoteJid, replyPreview: replyText.slice(0, 160) },
+            "Sending WhatsApp text reply"
+          );
           await socket?.sendMessage(remoteJid, { text: replyText });
+        }
+
+        if (!sentMedia && !replyText) {
+          log.info({ remoteJid }, "No reply content to send");
         }
       } catch (error) {
         log.error(
@@ -316,7 +385,9 @@ app.post("/send", async (req: Request, res: Response) => {
 
   try {
     const jid = normalizeJid(to);
+    log.info({ to: jid, length: message.length }, "Sending WhatsApp text via API");
     await socket.sendMessage(jid, { text: message });
+    log.info({ to: jid }, "WhatsApp text sent via API");
     return res.json({ ok: true, to: jid });
   } catch (error) {
     log.error({ error }, "Failed to send message");
@@ -353,11 +424,19 @@ app.post("/send-media", async (req: Request, res: Response) => {
   try {
     const jid = normalizeJid(to);
     let sentCount = 0;
+    log.info(
+      { to: jid, images: mediaUrls.length, hasVoiceNote: Boolean(voice_url) },
+      "Sending WhatsApp media via API"
+    );
 
     if (mediaUrls.length > 0) {
       for (let index = 0; index < mediaUrls.length; index += 1) {
         const url = mediaUrls[index];
         const imageCaption = index === 0 && caption ? caption : undefined;
+        log.info(
+          { to: jid, index: index + 1, total: mediaUrls.length },
+          "Sending WhatsApp image via API"
+        );
         await socket.sendMessage(jid, {
           image: { url },
           ...(imageCaption ? { caption: imageCaption } : {}),
@@ -368,6 +447,10 @@ app.post("/send-media", async (req: Request, res: Response) => {
 
     if (voice_url) {
       const audioMeta = getAudioMeta(voice_url);
+      log.info(
+        { to: jid, mimetype: audioMeta.mimetype, ptt: audioMeta.ptt },
+        "Sending WhatsApp voice note via API"
+      );
       await socket.sendMessage(jid, {
         audio: { url: voice_url },
         mimetype: audioMeta.mimetype,
@@ -377,6 +460,7 @@ app.post("/send-media", async (req: Request, res: Response) => {
       sentCount += 1;
     }
 
+    log.info({ to: jid, sent: sentCount }, "WhatsApp media sent via API");
     return res.json({ ok: true, to: jid, sent: sentCount });
   } catch (error) {
     log.error({ error: formatError(error) }, "Failed to send media");

@@ -28,6 +28,13 @@ const ChannelIcon = ({ icon }: { icon: string }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
         </svg>
       );
+    case "whatsapp":
+      return (
+        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12a9 9 0 111.764 5.33L3 21l3.67-1.764A9 9 0 013 12z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.5 9.5c.2-1 .9-1.5 1.7-1.5.8 0 1.4.5 1.7 1.5m-3.4 5c.8.9 1.9 1.5 3.4 1.5s2.6-.6 3.4-1.5" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -39,7 +46,7 @@ export function ChannelSelector({
   onSelect,
 }: ChannelSelectorProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 max-w-4xl mx-auto">
+    <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
       {channels.map((channel) => {
         const isSelected = selectedChannel === channel.id;
         

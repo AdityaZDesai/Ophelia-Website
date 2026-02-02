@@ -133,6 +133,13 @@ export const COMMUNICATION_CHANNELS: ChannelOption[] = [
     requiresPhone: true,
   },
   {
+    id: "whatsapp",
+    name: "WhatsApp",
+    description: "Chat on WhatsApp — fast and familiar",
+    icon: "whatsapp",
+    requiresPhone: true,
+  },
+  {
     id: "web",
     name: "Web Chat",
     description: "Chat on the web — no phone needed",

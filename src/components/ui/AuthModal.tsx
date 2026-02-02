@@ -36,6 +36,17 @@ export function AuthModal({
     }
   }, [initialMode, isOpen]);
 
+  const getRedirectForChannel = (channel?: string | null) => {
+    switch (channel) {
+      case "imessage":
+        return "/imessage-chat";
+      case "whatsapp":
+        return "/whatsapp-chat";
+      default:
+        return "/chat";
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,9 +130,10 @@ export function AuthModal({
             
             // If user has completed onboarding, redirect to chat
             if (status.onboardingCompleted) {
-              console.log(`[AuthModal] User has completed onboarding, redirecting to /chat`);
+              const redirectPath = getRedirectForChannel(status.communicationChannel);
+              console.log(`[AuthModal] User has completed onboarding, redirecting to ${redirectPath}`);
               onSuccess();
-              router.push("/chat");
+              router.push(redirectPath);
               return;
             } else {
               console.log(`[AuthModal] User has NOT completed onboarding`);
@@ -205,8 +217,9 @@ export function AuthModal({
           
           // If user has completed onboarding, redirect to chat
           if (status.onboardingCompleted) {
-            console.log(`[AuthModal] User has completed onboarding, redirecting to /chat`);
-            router.push("/chat");
+            const redirectPath = getRedirectForChannel(status.communicationChannel);
+            console.log(`[AuthModal] User has completed onboarding, redirecting to ${redirectPath}`);
+            router.push(redirectPath);
             return;
           } else {
             console.log(`[AuthModal] User has NOT completed onboarding`);

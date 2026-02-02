@@ -37,7 +37,8 @@ export default function OnboardingPage() {
 
   const personalityData = PERSONALITIES.find((p) => p.id === selectedPersonality);
 
-  const requiresPhone = selectedChannel === "imessage";
+  const requiresPhone = selectedChannel === "imessage" || selectedChannel === "whatsapp";
+  const selectedChannelLabel = selectedChannel === "whatsapp" ? "WhatsApp" : "iMessage";
 
   const handleChannelSelect = (channel: CommunicationChannel) => {
     setSelectedChannel(channel);
@@ -88,20 +89,27 @@ export default function OnboardingPage() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || "Failed to save preferences");
+      }
+
+      if (selectedChannel === "whatsapp" && data?.authCode) {
+        sessionStorage.setItem("whatsappAuthCode", data.authCode);
       }
 
       // Clear session storage
       sessionStorage.removeItem("selectedPersonality");
 
       // Redirect based on selected channel
-      if (selectedChannel === "imessage") {
-        router.push("/imessage-chat");
-      } else {
-        router.push("/chat");
-      }
+       if (selectedChannel === "imessage") {
+         router.push("/imessage-chat");
+       } else if (selectedChannel === "whatsapp") {
+         router.push("/whatsapp-chat");
+       } else {
+         router.push("/chat");
+       }
     } catch (error) {
       console.error("Onboarding error:", error);
       setPhoneError("Something went wrong. Please try again.");
@@ -217,7 +225,7 @@ export default function OnboardingPage() {
               </h2>
               <p className="font-jakarta text-white/60">
                 Enter your phone number so {personalityData?.name || "Ophelia"} can reach you on{" "}
-                iMessage
+                {selectedChannelLabel}
               </p>
             </div>
 
