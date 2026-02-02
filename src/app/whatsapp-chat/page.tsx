@@ -41,7 +41,7 @@ export default function WhatsAppChatPage() {
 
   const messageText = useMemo(() => {
     if (authCode) {
-      return `My code is ${authCode}`;
+      return authCode;
     }
 
     return "Hello";

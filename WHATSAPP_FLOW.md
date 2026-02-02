@@ -10,6 +10,38 @@ This document explains how the WhatsApp integration works in this repo and how t
 
 Key idea: the adapter is the WhatsApp client. It receives inbound WhatsApp messages, forwards them to Chat0, then sends Chat0's reply back to WhatsApp.
 
+## Onboarding + Verification Code (WhatsApp)
+
+When a user selects WhatsApp during onboarding, we generate a short auth code, store it on the user record, and ask them to send it via WhatsApp to the companion number.
+
+DB additions (user table):
+
+```sql
+ALTER TABLE "user"
+  ADD COLUMN IF NOT EXISTS auth_code text,
+  ADD COLUMN IF NOT EXISTS verified boolean DEFAULT false;
+```
+
+Onboarding API behavior (`POST /api/user/onboarding`):
+
+- For `communicationChannel === "whatsapp"`, generate a random 6-digit numeric code.
+- Save on the user record: `auth_code = <code>`, `verified = false`.
+- Return `{ success: true, authCode: <code> }` to the frontend.
+
+Frontend behavior:
+
+- Store `authCode` from onboarding in session storage (`whatsappAuthCode`).
+- Redirect to the WhatsApp connect screen.
+- Show the ASCII art block (same art style as iMessage onboarding).
+- Display the auth code on screen and instruct the user to send it to `+61424532203`.
+- Update the WhatsApp link to prefill the message with ONLY the code.
+
+WhatsApp link format:
+
+```
+https://wa.me/61424532203?text=<auth_code>
+```
+
 ## WhatsApp Linking Flow
 
 1. The adapter starts and requests a QR code from WhatsApp servers.
