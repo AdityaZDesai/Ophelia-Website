@@ -38,7 +38,6 @@ export default function OnboardingPage() {
   const personalityData = PERSONALITIES.find((p) => p.id === selectedPersonality);
 
   const requiresPhone = selectedChannel === "imessage" || selectedChannel === "whatsapp";
-  const isDiscord = selectedChannel === "discord";
   const selectedChannelLabel = selectedChannel === "whatsapp" ? "WhatsApp" : "iMessage";
 
   const handleChannelSelect = (channel: CommunicationChannel) => {
@@ -51,9 +50,6 @@ export default function OnboardingPage() {
 
     if (requiresPhone) {
       setStep("phone");
-    } else if (isDiscord) {
-      // Discord selected - start OAuth flow
-      handleDiscordOnboarding();
     } else {
       // Web selected - complete onboarding without phone
       handleSubmit();
@@ -73,51 +69,6 @@ export default function OnboardingPage() {
     return true;
   };
 
-  const handleDiscordOnboarding = async () => {
-    if (!selectedChannel || !session) return;
-
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/user/onboarding", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          communicationChannel: "discord",
-          selectedPersonality,
-          name: session?.user?.name || "User",
-          email: session?.user?.email || "",
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to generate Discord verification link");
-      }
-
-      const data = await response.json();
-      
-      // Store verification data
-      sessionStorage.setItem("discord_verification_url", data.verification_url);
-      sessionStorage.setItem("discord_user_id", data.user_id);
-      
-      // Get bot invite link
-      const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-      const inviteResponse = await fetch(`${BACKEND_API_URL}/api/discord/invite`);
-      const inviteData = await inviteResponse.json();
-      
-      // Redirect to Discord verification page
-      router.push(`/discord/verify?verification_url=${encodeURIComponent(data.verification_url)}&invite_url=${encodeURIComponent(inviteData.invite_url || "")}`);
-    } catch (error) {
-      console.error("Discord onboarding error:", error);
-      setPhoneError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async () => {
     if (requiresPhone && !validatePhone()) {
       return;
@@ -135,8 +86,6 @@ export default function OnboardingPage() {
           communicationChannel: selectedChannel,
           phone: requiresPhone ? phone : null,
           selectedPersonality,
-          name: session?.user?.name || "User",
-          email: session?.user?.email || "",
         }),
       });
 
@@ -245,8 +194,6 @@ export default function OnboardingPage() {
                   "Please wait..."
                 ) : selectedChannel === "web" ? (
                   "Start Chatting"
-                ) : selectedChannel === "discord" ? (
-                  "Connect Discord"
                 ) : (
                   "Continue"
                 )}
