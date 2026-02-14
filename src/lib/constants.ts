@@ -140,6 +140,13 @@ export const COMMUNICATION_CHANNELS: ChannelOption[] = [
     requiresPhone: true,
   },
   {
+    id: "discord",
+    name: "Discord",
+    description: "Chat on Discord — join servers and chat anywhere",
+    icon: "discord",
+    requiresPhone: false,
+  },
+  {
     id: "web",
     name: "Web Chat",
     description: "Chat on the web — no phone needed",

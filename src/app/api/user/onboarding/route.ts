@@ -1,11 +1,8 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export async function POST(request: Request) {
   try {
@@ -22,53 +19,88 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { communicationChannel, phone, selectedPersonality } = body;
-    const normalizedPhone = typeof phone === "string" ? phone.replace(/\s+/g, "") : phone;
-    const authCode =
-      communicationChannel === "whatsapp"
-        ? Math.floor(100000 + Math.random() * 900000).toString()
-        : null;
-    const verified = communicationChannel === "whatsapp" ? false : null;
+    const { communicationChannel, phone, selectedPersonality, name, email } = body;
 
     // Validate communication channel
-    if (!communicationChannel || !["imessage", "web", "whatsapp"].includes(communicationChannel)) {
+    if (!communicationChannel || !["imessage", "whatsapp", "web", "discord"].includes(communicationChannel)) {
       return NextResponse.json(
         { error: "Invalid communication channel" },
         { status: 400 }
       );
     }
 
+    // For Discord, call the backend API to get OAuth verification link
+    if (communicationChannel === "discord") {
+      const backendResponse = await fetch(`${BACKEND_API_URL}/api/user/onboarding`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Basic ${Buffer.from(`${session.user.id}:`).toString("base64")}`, // Basic auth with user_id
+        },
+        body: JSON.stringify({
+          name: name || session.user.name || "User",
+          email: email || session.user.email || "",
+          selectedPersonality: selectedPersonality || "loving",
+          communicationChannel: "discord",
+        }),
+      });
+
+      if (!backendResponse.ok) {
+        const errorData = await backendResponse.json();
+        return NextResponse.json(
+          { error: errorData.message || "Failed to generate Discord verification link" },
+          { status: backendResponse.status }
+        );
+      }
+
+      const backendData = await backendResponse.json();
+      return NextResponse.json({
+        success: true,
+        verification_url: backendData.verification_url,
+        verification_token: backendData.verification_token,
+        user_id: backendData.user_id,
+      });
+    }
+
+    // For other channels, call backend API
+    const normalizedPhone = typeof phone === "string" ? phone.replace(/\s+/g, "") : phone;
+    
     // Validate phone if channel requires it
-    if (communicationChannel !== "web" && !normalizedPhone) {
+    if ((communicationChannel === "imessage" || communicationChannel === "whatsapp") && !normalizedPhone) {
       return NextResponse.json(
-        { error: "Phone number is required for this channel" },
+        { error: "Phone number is required for iMessage or WhatsApp" },
         { status: 400 }
       );
     }
 
-    // Update user in database
-    const updateQuery = `
-      UPDATE "user"
-      SET 
-        "communicationChannel" = $1,
-        "phone" = $2,
-        "selectedPersonality" = $3,
-        "onboardingCompleted" = true,
-        "auth_code" = $5,
-        "verified" = $6
-      WHERE "id" = $4
-    `;
+    const backendResponse = await fetch(`${BACKEND_API_URL}/api/user/onboarding`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${Buffer.from(`${session.user.id}:`).toString("base64")}`,
+      },
+      body: JSON.stringify({
+        name: name || session.user.name || "User",
+        email: email || session.user.email || "",
+        selectedPersonality: selectedPersonality || "loving",
+        communicationChannel,
+        phone: (communicationChannel === "imessage" || communicationChannel === "whatsapp") ? normalizedPhone : null,
+      }),
+    });
 
-    await pool.query(updateQuery, [
-      communicationChannel,
-      communicationChannel === "web" ? null : normalizedPhone,
-      selectedPersonality || null,
-      session.user.id,
-      authCode,
-      verified,
-    ]);
+    if (!backendResponse.ok) {
+      const errorData = await backendResponse.json();
+      return NextResponse.json(
+        { error: errorData.message || "Failed to complete onboarding" },
+        { status: backendResponse.status }
+      );
+    }
 
-    return NextResponse.json({ success: true, authCode });
+    const backendData = await backendResponse.json();
+    return NextResponse.json({
+      success: true,
+      ...backendData, // Include authCode, verification_url, etc. from backend
+    });
   } catch (error) {
     console.error("Onboarding error:", error);
     return NextResponse.json(
