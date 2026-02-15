@@ -92,7 +92,10 @@ export async function POST(request: Request) {
       const discordPayload = {
         name: session.user.name || "User",
         email: session.user.email,
+        selectedPersonalityId: selectedPersonality,
         selectedPersonality: toBackendPersonality(selectedPersonality),
+        selectedPhoto,
+        selectedAudio,
         communicationChannel: "discord",
       };
 
