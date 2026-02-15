@@ -1,4 +1,13 @@
-import type { NavLink, ExperienceItem, Testimonial, PhilosophyValue, Personality, ChannelOption } from "@/types";
+import type {
+  NavLink,
+  ExperienceItem,
+  Testimonial,
+  PhilosophyValue,
+  Personality,
+  ChannelOption,
+  GirlPhotoOption,
+  AudioOption,
+} from "@/types";
 
 // Navigation links
 export const NAV_LINKS: NavLink[] = [
@@ -123,6 +132,45 @@ export const PERSONALITIES: Personality[] = [
   },
 ];
 
+export const GIRL_PHOTOS: GirlPhotoOption[] = [
+  {
+    id: "serena",
+    name: "Serena",
+    image: "/personalities/serena.png",
+  },
+  {
+    id: "luna",
+    name: "Luna",
+    image: "/personalities/luna.png",
+  },
+  {
+    id: "valentina",
+    name: "Valentina",
+    image: "/personalities/valentina.png",
+  },
+];
+
+export const AUDIO_OPTIONS: AudioOption[] = [
+  {
+    id: "jessica_v3",
+    name: "Jessica",
+    src: "/voice_samples/Jessica(v3).mp3",
+    description: "Soft and affectionate",
+  },
+  {
+    id: "serafina",
+    name: "Serafina",
+    src: "/voice_samples/Serafina.mp3",
+    description: "Elegant and romantic",
+  },
+  {
+    id: "ivanna",
+    name: "Ivanna",
+    src: "/voice_samples/Ivanna.mp3",
+    description: "Confident and playful",
+  },
+];
+
 // Communication channels
 export const COMMUNICATION_CHANNELS: ChannelOption[] = [
   {
@@ -138,6 +186,13 @@ export const COMMUNICATION_CHANNELS: ChannelOption[] = [
     description: "Chat on WhatsApp — fast and familiar",
     icon: "whatsapp",
     requiresPhone: true,
+  },
+  {
+    id: "telegram",
+    name: "Telegram",
+    description: "Chat on Telegram - private and secure",
+    icon: "telegram",
+    requiresPhone: false,
   },
   {
     id: "web",

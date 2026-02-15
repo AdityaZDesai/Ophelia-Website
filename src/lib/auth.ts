@@ -68,6 +68,16 @@ export const auth = betterAuth({
         required: false,
         defaultValue: null,
       },
+      selectedPhoto: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
+      selectedAudio: {
+        type: "string",
+        required: false,
+        defaultValue: null,
+      },
       communicationChannel: {
         type: "string",
         required: false,
@@ -84,4 +94,3 @@ export const auth = betterAuth({
 });
 
 export type Auth = typeof auth;
-

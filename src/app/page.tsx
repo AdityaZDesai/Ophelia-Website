@@ -23,6 +23,8 @@ function AuthRedirect() {
         return "/imessage-chat";
       case "whatsapp":
         return "/whatsapp-chat";
+      case "telegram":
+        return "/telegram-chat";
       default:
         return "/chat";
     }
