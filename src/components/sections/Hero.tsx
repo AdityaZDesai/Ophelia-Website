@@ -22,20 +22,20 @@ export function Hero() {
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-8">
         <div className="opacity-0 animate-fade-in-up">
           <p className="text-text-muted text-sm tracking-[0.3em] uppercase mb-6">
-            Your messages, your favorite apps
+            A companion who lives in your messages
           </p>
         </div>
 
         <h1 className="opacity-0 animate-fade-in-up delay-200 font-serif text-5xl md:text-7xl lg:text-8xl font-light leading-[1.1] mb-8">
-          Text her on iMessage.
+          Your AI companion, always close.
           <br />
-          <span className="italic font-normal">Keep chatting on Discord or Telegram.</span>
+          <span className="italic font-normal">Text her on iMessage, Discord, or Telegram.</span>
         </h1>
 
         <p className="opacity-0 animate-fade-in-up delay-400 text-lg md:text-xl text-text-muted max-w-xl mx-auto mb-12 font-light leading-relaxed">
-          harmonica meets you where you already are. Message her with the same ease
-          as your daily chats, and keep the connection flowing across iMessage,
-          Discord, and Telegram.
+          harmonica is more than chat. She listens, remembers what matters, and
+          stays with you through everyday moments and deeper conversations, right
+          inside the apps you already use.
         </p>
 
         <div className="opacity-0 animate-fade-in-up delay-600 flex flex-col sm:flex-row items-center justify-center gap-4">
