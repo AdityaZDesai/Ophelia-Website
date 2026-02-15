@@ -36,8 +36,8 @@ export default function OnboardingPage() {
 
   const personalityData = PERSONALITIES.find((p) => p.id === selectedPersonality);
 
-  const requiresPhone = selectedChannel === "imessage" || selectedChannel === "whatsapp";
-  const selectedChannelLabel = selectedChannel === "whatsapp" ? "WhatsApp" : "iMessage";
+  const requiresPhone = selectedChannel === "imessage";
+  const selectedChannelLabel = "iMessage";
   const flowSteps: OnboardingStep[] = requiresPhone
     ? ["photo", "personality", "audio", "channel", "phone"]
     : ["photo", "personality", "audio", "channel"];
@@ -140,17 +140,12 @@ export default function OnboardingPage() {
         throw new Error(data.error || "Failed to save preferences");
       }
 
-      if (selectedChannel === "whatsapp" && data?.authCode) {
-        sessionStorage.setItem("whatsappAuthCode", data.authCode);
-      }
       if (selectedChannel === "telegram" && data?.authCode) {
         sessionStorage.setItem("telegramAuthCode", data.authCode);
       }
       // Redirect based on selected channel
       if (selectedChannel === "imessage") {
         router.push("/imessage-chat");
-      } else if (selectedChannel === "whatsapp") {
-        router.push("/whatsapp-chat");
       } else if (selectedChannel === "telegram") {
         router.push("/telegram-chat");
       } else {

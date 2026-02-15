@@ -32,10 +32,10 @@ export async function POST(request: Request) {
     } = body;
     const normalizedPhone = typeof phone === "string" ? phone.replace(/\s+/g, "") : phone;
     const authCode =
-      communicationChannel === "whatsapp" || communicationChannel === "telegram"
+      communicationChannel === "telegram"
         ? Math.floor(100000 + Math.random() * 900000).toString()
         : null;
-    const verified = communicationChannel === "whatsapp" || communicationChannel === "telegram" ? false : null;
+    const verified = communicationChannel === "telegram" ? false : null;
 
     const validPhotoIds = GIRL_PHOTOS.map((photo) => photo.id);
     const validPersonalityIds = PERSONALITIES.map((personality) => personality.id);
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     }
 
     // Validate communication channel
-    if (!communicationChannel || !["imessage", "web", "whatsapp", "telegram"].includes(communicationChannel)) {
+    if (!communicationChannel || !["imessage", "web", "telegram"].includes(communicationChannel)) {
       return NextResponse.json(
         { error: "Invalid communication channel" },
         { status: 400 }
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     }
 
     // Validate phone if channel requires it
-    if ((communicationChannel === "imessage" || communicationChannel === "whatsapp") && !normalizedPhone) {
+    if (communicationChannel === "imessage" && !normalizedPhone) {
       return NextResponse.json(
         { error: "Phone number is required for this channel" },
         { status: 400 }
