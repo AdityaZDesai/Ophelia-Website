@@ -2,7 +2,7 @@ import { Button } from "@/components/ui";
 
 export function Hero() {
   return (
-    <section className="relative pt-24 pb-16 overflow-hidden">
+    <section className="relative pt-32 md:pt-36 pb-16 overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-rose/30 rounded-full blur-3xl animate-pulse-soft" />
         <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-pulse-soft delay-700" />
@@ -19,20 +19,20 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-8">
+      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-12 md:pt-16">
         <div className="opacity-0 animate-fade-in-up">
-          <p className="text-text-muted text-sm tracking-[0.3em] uppercase mb-6">
+          <p className="text-text-muted text-xs md:text-sm tracking-[0.3em] uppercase mb-6">
             A companion who lives in your messages
           </p>
         </div>
 
-        <h1 className="opacity-0 animate-fade-in-up delay-200 font-serif text-5xl md:text-7xl lg:text-8xl font-light leading-[1.1] mb-8">
+        <h1 className="opacity-0 animate-fade-in-up delay-200 font-serif text-4xl md:text-6xl lg:text-7xl font-light leading-[1.1] mb-8">
           Your AI companion, always close.
           <br />
           <span className="italic font-normal">Text her on iMessage, Discord, or Telegram.</span>
         </h1>
 
-        <p className="opacity-0 animate-fade-in-up delay-400 text-lg md:text-xl text-text-muted max-w-xl mx-auto mb-12 font-light leading-relaxed">
+        <p className="opacity-0 animate-fade-in-up delay-400 text-base md:text-lg text-text-muted max-w-xl mx-auto mb-12 font-light leading-relaxed">
           harmonica is more than chat. She listens, remembers what matters, and
           stays with you through everyday moments and deeper conversations, right
           inside the apps you already use.
