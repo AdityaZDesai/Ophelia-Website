@@ -26,7 +26,13 @@ export interface PhilosophyValue {
 }
 
 // Personality types
-export type PersonalityId = "vanilla" | "goth" | "dominant";
+export type PersonalityId =
+  | "vanilla"
+  | "goth"
+  | "dominant"
+  | "yandere"
+  | "dandere"
+  | "kuudere";
 
 export interface Personality {
   id: PersonalityId;
@@ -38,7 +44,7 @@ export interface Personality {
   image: string;
 }
 
-export type GirlPhotoId = "serena" | "luna" | "valentina";
+export type GirlPhotoId = "serena" | "luna" | "valentina" | "himari" | "yuki" | "mei";
 
 export interface GirlPhotoOption {
   id: GirlPhotoId;
@@ -46,7 +52,7 @@ export interface GirlPhotoOption {
   image: string;
 }
 
-export type AudioOptionId = "jessica_v3" | "serafina" | "ivanna";
+export type AudioOptionId = "jessica_v3" | "serafina" | "ivanna" | "hina_yandere" | "kuon";
 
 export interface AudioOption {
   id: AudioOptionId;

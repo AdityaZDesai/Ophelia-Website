@@ -130,6 +130,33 @@ export const PERSONALITIES: Personality[] = [
     accentColor: "#dc2626",
     image: "/personalities/valentina.png",
   },
+  {
+    id: "yandere",
+    name: "Yandere",
+    tagline: "Devoted & Intense",
+    description: "Intensely devoted and emotionally possessive, she loves with fierce loyalty and all-consuming passion.",
+    gradient: "from-rose-300 via-red-300 to-pink-300",
+    accentColor: "#e11d48",
+    image: "/personalities/himari.png",
+  },
+  {
+    id: "dandere",
+    name: "Dandere",
+    tagline: "Quiet & Gentle",
+    description: "Quiet, shy, and gentle at first, she opens up slowly and shows deep affection once she trusts you.",
+    gradient: "from-blue-200 via-sky-100 to-slate-200",
+    accentColor: "#0ea5e9",
+    image: "/personalities/yuki.png",
+  },
+  {
+    id: "kuudere",
+    name: "Kuudere",
+    tagline: "Calm & Reserved",
+    description: "Calm, composed, and emotionally restrained on the surface, with rare but meaningful moments of warmth.",
+    gradient: "from-cyan-200 via-slate-200 to-indigo-200",
+    accentColor: "#2563eb",
+    image: "/personalities/mei.png",
+  },
 ];
 
 export const GIRL_PHOTOS: GirlPhotoOption[] = [
@@ -148,26 +175,53 @@ export const GIRL_PHOTOS: GirlPhotoOption[] = [
     name: "Valentina",
     image: "/personalities/valentina.png",
   },
+  {
+    id: "himari",
+    name: "Himari",
+    image: "/personalities/himari.png",
+  },
+  {
+    id: "yuki",
+    name: "Yuki",
+    image: "/personalities/yuki.png",
+  },
+  {
+    id: "mei",
+    name: "Mei",
+    image: "/personalities/mei.png",
+  },
 ];
 
 export const AUDIO_OPTIONS: AudioOption[] = [
   {
     id: "jessica_v3",
-    name: "Jessica",
+    name: "Jessica(v3)",
     src: "/voice_samples/Jessica(v3).mp3",
-    description: "Soft and affectionate",
+    description: "Jessica(v3) voice sample",
   },
   {
     id: "serafina",
     name: "Serafina",
     src: "/voice_samples/Serafina.mp3",
-    description: "Elegant and romantic",
+    description: "Serafina voice sample",
   },
   {
     id: "ivanna",
     name: "Ivanna",
     src: "/voice_samples/Ivanna.mp3",
-    description: "Confident and playful",
+    description: "Ivanna voice sample",
+  },
+  {
+    id: "hina_yandere",
+    name: "Hina Yandere",
+    src: "/voice_samples/hina_yandere.mp3",
+    description: "Hina Yandere voice sample",
+  },
+  {
+    id: "kuon",
+    name: "Kuon",
+    src: "/voice_samples/kuon.mp3",
+    description: "Kuon voice sample",
   },
 ];
 
