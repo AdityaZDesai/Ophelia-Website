@@ -37,6 +37,9 @@ export default function ChatPage() {
       vanilla: "loving",
       goth: "tsundere",
       dominant: "dominant",
+      yandere: "dominant",
+      dandere: "loving",
+      kuudere: "tsundere",
     };
     return personalityId ? mapping[personalityId] || "loving" : "loving";
   };

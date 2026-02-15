@@ -13,6 +13,10 @@ export function Personalities() {
   
   const [selectedPersonality, setSelectedPersonality] = useState<Personality | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const featuredPersonalityIds = ["vanilla", "yandere", "goth"] as const;
+  const featuredPersonalities = featuredPersonalityIds
+    .map((id) => PERSONALITIES.find((personality) => personality.id === id))
+    .filter((personality): personality is Personality => Boolean(personality));
 
   const handlePersonalitySelect = (personality: Personality) => {
     setSelectedPersonality(personality);
@@ -55,7 +59,7 @@ export function Personalities() {
               isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-            {PERSONALITIES.map((personality) => (
+            {featuredPersonalities.map((personality) => (
               <PersonalityCard
                 key={personality.id}
                 personality={personality}

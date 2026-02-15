@@ -26,7 +26,13 @@ export interface PhilosophyValue {
 }
 
 // Personality types
-export type PersonalityId = "vanilla" | "goth" | "dominant";
+export type PersonalityId =
+  | "vanilla"
+  | "goth"
+  | "dominant"
+  | "yandere"
+  | "dandere"
+  | "kuudere";
 
 export interface Personality {
   id: PersonalityId;
@@ -38,8 +44,25 @@ export interface Personality {
   image: string;
 }
 
+export type GirlPhotoId = "serena" | "luna" | "valentina" | "himari" | "yuki" | "mei";
+
+export interface GirlPhotoOption {
+  id: GirlPhotoId;
+  name: string;
+  image: string;
+}
+
+export type AudioOptionId = "jessica_v3" | "serafina" | "ivanna" | "hina_yandere" | "kuon";
+
+export interface AudioOption {
+  id: AudioOptionId;
+  name: string;
+  src: string;
+  description: string;
+}
+
 // Communication channel types
-export type CommunicationChannel = "imessage" | "web" | "whatsapp";
+export type CommunicationChannel = "imessage" | "web" | "whatsapp" | "telegram";
 
 export interface ChannelOption {
   id: CommunicationChannel;
@@ -51,7 +74,9 @@ export interface ChannelOption {
 
 // Auth types
 export interface OnboardingData {
+  selectedPhoto: GirlPhotoId;
   selectedPersonality: PersonalityId;
+  selectedAudio: AudioOptionId;
   communicationChannel: CommunicationChannel;
   phone?: string;
 }

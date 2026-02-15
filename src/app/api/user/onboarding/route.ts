@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { AUDIO_OPTIONS, GIRL_PHOTOS, PERSONALITIES } from "@/lib/constants";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
@@ -22,16 +23,47 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { communicationChannel, phone, selectedPersonality } = body;
+    const {
+      communicationChannel,
+      phone,
+      selectedPersonality,
+      selectedPhoto,
+      selectedAudio,
+    } = body;
     const normalizedPhone = typeof phone === "string" ? phone.replace(/\s+/g, "") : phone;
     const authCode =
-      communicationChannel === "whatsapp"
+      communicationChannel === "telegram"
         ? Math.floor(100000 + Math.random() * 900000).toString()
         : null;
-    const verified = communicationChannel === "whatsapp" ? false : null;
+    const verified = communicationChannel === "telegram" ? false : null;
+
+    const validPhotoIds = GIRL_PHOTOS.map((photo) => photo.id);
+    const validPersonalityIds = PERSONALITIES.map((personality) => personality.id);
+    const validAudioIds = AUDIO_OPTIONS.map((audio) => audio.id);
+
+    if (!selectedPhoto || !validPhotoIds.includes(selectedPhoto)) {
+      return NextResponse.json(
+        { error: "Invalid photo selection" },
+        { status: 400 }
+      );
+    }
+
+    if (!selectedPersonality || !validPersonalityIds.includes(selectedPersonality)) {
+      return NextResponse.json(
+        { error: "Invalid personality selection" },
+        { status: 400 }
+      );
+    }
+
+    if (!selectedAudio || !validAudioIds.includes(selectedAudio)) {
+      return NextResponse.json(
+        { error: "Invalid audio selection" },
+        { status: 400 }
+      );
+    }
 
     // Validate communication channel
-    if (!communicationChannel || !["imessage", "web", "whatsapp"].includes(communicationChannel)) {
+    if (!communicationChannel || !["imessage", "web", "telegram"].includes(communicationChannel)) {
       return NextResponse.json(
         { error: "Invalid communication channel" },
         { status: 400 }
@@ -39,7 +71,7 @@ export async function POST(request: Request) {
     }
 
     // Validate phone if channel requires it
-    if (communicationChannel !== "web" && !normalizedPhone) {
+    if (communicationChannel === "imessage" && !normalizedPhone) {
       return NextResponse.json(
         { error: "Phone number is required for this channel" },
         { status: 400 }
@@ -53,16 +85,20 @@ export async function POST(request: Request) {
         "communicationChannel" = $1,
         "phone" = $2,
         "selectedPersonality" = $3,
+        "selectedPhoto" = $4,
+        "selectedAudio" = $5,
         "onboardingCompleted" = true,
-        "auth_code" = $5,
-        "verified" = $6
-      WHERE "id" = $4
+        "auth_code" = $7,
+        "verified" = $8
+      WHERE "id" = $6
     `;
 
     await pool.query(updateQuery, [
       communicationChannel,
-      communicationChannel === "web" ? null : normalizedPhone,
-      selectedPersonality || null,
+      communicationChannel === "web" || communicationChannel === "telegram" ? null : normalizedPhone,
+      selectedPersonality,
+      selectedPhoto,
+      selectedAudio,
       session.user.id,
       authCode,
       verified,

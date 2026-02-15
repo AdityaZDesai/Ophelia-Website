@@ -3,30 +3,29 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { ChannelSelector, PhoneInput } from "@/components/ui";
-import { COMMUNICATION_CHANNELS, PERSONALITIES } from "@/lib/constants";
-import type { CommunicationChannel, PersonalityId } from "@/types";
+import { AudioPlayer, ChannelSelector, PhoneInput } from "@/components/ui";
+import { AUDIO_OPTIONS, COMMUNICATION_CHANNELS, GIRL_PHOTOS, PERSONALITIES } from "@/lib/constants";
+import type {
+  AudioOptionId,
+  CommunicationChannel,
+  GirlPhotoId,
+  PersonalityId,
+} from "@/types";
 
-type OnboardingStep = "channel" | "phone";
+type OnboardingStep = "photo" | "personality" | "audio" | "channel" | "phone";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   
-  const [step, setStep] = useState<OnboardingStep>("channel");
+  const [step, setStep] = useState<OnboardingStep>("photo");
+  const [selectedPhoto, setSelectedPhoto] = useState<GirlPhotoId | null>(null);
   const [selectedChannel, setSelectedChannel] = useState<CommunicationChannel | null>(null);
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [selectedPersonality, setSelectedPersonality] = useState<PersonalityId | null>(null);
-
-  // Get selected personality from session storage
-  useEffect(() => {
-    const storedPersonality = sessionStorage.getItem("selectedPersonality") as PersonalityId | null;
-    if (storedPersonality) {
-      setSelectedPersonality(storedPersonality);
-    }
-  }, []);
+  const [selectedAudio, setSelectedAudio] = useState<AudioOptionId | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -37,23 +36,62 @@ export default function OnboardingPage() {
 
   const personalityData = PERSONALITIES.find((p) => p.id === selectedPersonality);
 
-  const requiresPhone = selectedChannel === "imessage" || selectedChannel === "whatsapp";
-  const selectedChannelLabel = selectedChannel === "whatsapp" ? "WhatsApp" : "iMessage";
+  const requiresPhone = selectedChannel === "imessage";
+  const selectedChannelLabel = "iMessage";
+  const flowSteps: OnboardingStep[] = requiresPhone
+    ? ["photo", "personality", "audio", "channel", "phone"]
+    : ["photo", "personality", "audio", "channel"];
+  const currentStepIndex = flowSteps.indexOf(step);
+
+  const handleStepContinue = () => {
+    if (step === "photo" && selectedPhoto) {
+      setStep("personality");
+      return;
+    }
+
+    if (step === "personality" && selectedPersonality) {
+      setStep("audio");
+      return;
+    }
+
+    if (step === "audio" && selectedAudio) {
+      setStep("channel");
+      return;
+    }
+
+    if (step === "channel" && selectedChannel) {
+      if (requiresPhone) {
+        setStep("phone");
+      } else {
+        handleSubmit();
+      }
+    }
+  };
+
+  const handleBack = () => {
+    if (step === "phone") {
+      setStep("channel");
+      return;
+    }
+
+    if (step === "channel") {
+      setStep("audio");
+      return;
+    }
+
+    if (step === "audio") {
+      setStep("personality");
+      return;
+    }
+
+    if (step === "personality") {
+      setStep("photo");
+    }
+  };
 
   const handleChannelSelect = (channel: CommunicationChannel) => {
     setSelectedChannel(channel);
     setPhoneError(undefined);
-  };
-
-  const handleChannelContinue = () => {
-    if (!selectedChannel) return;
-
-    if (requiresPhone) {
-      setStep("phone");
-    } else {
-      // Web selected - complete onboarding without phone
-      handleSubmit();
-    }
   };
 
   const validatePhone = (): boolean => {
@@ -70,6 +108,11 @@ export default function OnboardingPage() {
   };
 
   const handleSubmit = async () => {
+    if (!selectedPhoto || !selectedPersonality || !selectedAudio || !selectedChannel) {
+      setPhoneError("Please complete all onboarding selections.");
+      return;
+    }
+
     if (requiresPhone && !validatePhone()) {
       return;
     }
@@ -83,9 +126,11 @@ export default function OnboardingPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          selectedPhoto,
           communicationChannel: selectedChannel,
           phone: requiresPhone ? phone : null,
           selectedPersonality,
+          selectedAudio,
         }),
       });
 
@@ -95,21 +140,17 @@ export default function OnboardingPage() {
         throw new Error(data.error || "Failed to save preferences");
       }
 
-      if (selectedChannel === "whatsapp" && data?.authCode) {
-        sessionStorage.setItem("whatsappAuthCode", data.authCode);
+      if (selectedChannel === "telegram" && data?.authCode) {
+        sessionStorage.setItem("telegramAuthCode", data.authCode);
       }
-
-      // Clear session storage
-      sessionStorage.removeItem("selectedPersonality");
-
       // Redirect based on selected channel
-       if (selectedChannel === "imessage") {
-         router.push("/imessage-chat");
-       } else if (selectedChannel === "whatsapp") {
-         router.push("/whatsapp-chat");
-       } else {
-         router.push("/chat");
-       }
+      if (selectedChannel === "imessage") {
+        router.push("/imessage-chat");
+      } else if (selectedChannel === "telegram") {
+        router.push("/telegram-chat");
+      } else {
+        router.push("/chat");
+      }
     } catch (error) {
       console.error("Onboarding error:", error);
       setPhoneError("Something went wrong. Please try again.");
@@ -146,21 +187,196 @@ export default function OnboardingPage() {
 
         {/* Progress Indicator */}
         <div className="flex justify-center gap-2 mb-12">
-          <div
-            className={`h-1 w-12 rounded-full transition-colors ${
-              step === "channel" ? "bg-white" : "bg-white/30"
-            }`}
-          />
-          {requiresPhone && (
+          {flowSteps.map((flowStep, idx) => (
             <div
+              key={flowStep}
               className={`h-1 w-12 rounded-full transition-colors ${
-                step === "phone" ? "bg-white" : "bg-white/30"
+                idx <= currentStepIndex ? "bg-white" : "bg-white/30"
               }`}
             />
-          )}
+          ))}
         </div>
 
         {/* Step Content */}
+        {step === "photo" && (
+          <div className="animate-fade-in">
+            <div className="text-center mb-10">
+              <h2 className="font-cormorant text-3xl md:text-4xl text-white mb-3">
+                Choose her photo
+              </h2>
+              <p className="font-jakarta text-white/60">
+                Pick the look you want first
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {GIRL_PHOTOS.map((photo) => {
+                const isSelected = selectedPhoto === photo.id;
+                return (
+                  <button
+                    key={photo.id}
+                    onClick={() => setSelectedPhoto(photo.id)}
+                    className={`group rounded-2xl overflow-hidden border transition-all duration-300 ${
+                      isSelected
+                        ? "border-white shadow-lg shadow-white/20 scale-[1.01]"
+                        : "border-white/10 hover:border-white/40"
+                    }`}
+                  >
+                    <div className="relative aspect-[4/5] w-full">
+                      <img
+                        src={photo.image}
+                        alt={photo.name}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    </div>
+                    <div className="px-4 py-3 bg-white/5 text-white font-jakarta text-sm">
+                      {photo.name}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-10 text-center">
+              <button
+                onClick={handleStepContinue}
+                disabled={!selectedPhoto || loading}
+                className={`
+                  inline-flex items-center gap-3 px-10 py-4 font-jakarta font-medium rounded-full transition-all duration-300
+                  ${selectedPhoto
+                    ? "bg-white text-black hover:bg-white/90 shadow-lg hover:shadow-xl"
+                    : "bg-white/10 text-white/50 cursor-not-allowed"
+                  }
+                `}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === "personality" && (
+          <div className="animate-fade-in">
+            <div className="text-center mb-10">
+              <h2 className="font-cormorant text-3xl md:text-4xl text-white mb-3">
+                Choose her personality
+              </h2>
+              <p className="font-jakarta text-white/60">
+                Select the vibe that fits you best
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              {PERSONALITIES.map((personality) => (
+                <button
+                  key={personality.id}
+                  onClick={() => setSelectedPersonality(personality.id)}
+                  className={`w-full rounded-2xl border p-5 text-left transition-all duration-300 ${
+                    selectedPersonality === personality.id
+                      ? "border-white bg-white/10"
+                      : "border-white/10 bg-white/5 hover:border-white/30"
+                  }`}
+                >
+                  <p className="font-cormorant text-2xl text-white">{personality.name}</p>
+                  <p className="font-jakarta text-xs uppercase tracking-[0.2em] text-white/50 mt-1">
+                    {personality.tagline}
+                  </p>
+                  <p className="font-jakarta text-sm text-white/70 mt-3 leading-relaxed">
+                    {personality.description}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={handleBack}
+                disabled={loading}
+                className="px-8 py-3 text-white/70 hover:text-white font-jakarta text-sm"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleStepContinue}
+                disabled={!selectedPersonality || loading}
+                className={`
+                  inline-flex items-center gap-3 px-10 py-4 font-jakarta font-medium rounded-full transition-all duration-300
+                  ${selectedPersonality
+                    ? "bg-white text-black hover:bg-white/90 shadow-lg hover:shadow-xl"
+                    : "bg-white/10 text-white/50 cursor-not-allowed"
+                  }
+                `}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === "audio" && (
+          <div className="animate-fade-in">
+            <div className="text-center mb-10">
+              <h2 className="font-cormorant text-3xl md:text-4xl text-white mb-3">
+                Choose her voice
+              </h2>
+              <p className="font-jakarta text-white/60">
+                Listen to samples and pick your favorite audio style
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {AUDIO_OPTIONS.map((audio) => {
+                const isSelected = selectedAudio === audio.id;
+                return (
+                  <div
+                    key={audio.id}
+                    className={`rounded-2xl border p-4 transition-colors ${
+                      isSelected ? "border-white bg-white/10" : "border-white/10 bg-white/5"
+                    }`}
+                  >
+                    <AudioPlayer src={audio.src} name={audio.name} />
+                    <p className="mt-3 text-sm font-jakarta text-white/70">{audio.description}</p>
+                    <button
+                      onClick={() => setSelectedAudio(audio.id)}
+                      className={`mt-4 w-full py-2 rounded-lg font-jakarta text-sm transition-colors ${
+                        isSelected
+                          ? "bg-white text-black"
+                          : "bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                    >
+                      {isSelected ? "Selected" : "Select voice"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={handleBack}
+                disabled={loading}
+                className="px-8 py-3 text-white/70 hover:text-white font-jakarta text-sm"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleStepContinue}
+                disabled={!selectedAudio || loading}
+                className={`
+                  inline-flex items-center gap-3 px-10 py-4 font-jakarta font-medium rounded-full transition-all duration-300
+                  ${selectedAudio
+                    ? "bg-white text-black hover:bg-white/90 shadow-lg hover:shadow-xl"
+                    : "bg-white/10 text-white/50 cursor-not-allowed"
+                  }
+                `}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
         {step === "channel" && (
           <div className="animate-fade-in">
             <div className="text-center mb-10">
@@ -178,9 +394,16 @@ export default function OnboardingPage() {
               onSelect={handleChannelSelect}
             />
 
-            <div className="mt-10 text-center">
+            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
               <button
-                onClick={handleChannelContinue}
+                onClick={handleBack}
+                disabled={loading}
+                className="px-8 py-3 text-white/70 hover:text-white font-jakarta text-sm"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleStepContinue}
                 disabled={!selectedChannel || loading}
                 className={`
                   inline-flex items-center gap-3 px-10 py-4 font-jakarta font-medium rounded-full transition-all duration-300
@@ -196,21 +419,6 @@ export default function OnboardingPage() {
                   "Start Chatting"
                 ) : (
                   "Continue"
-                )}
-                {!loading && (
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    />
-                  </svg>
                 )}
               </button>
             </div>
@@ -246,7 +454,7 @@ export default function OnboardingPage() {
                 </button>
                 
                 <button
-                  onClick={() => setStep("channel")}
+                  onClick={handleBack}
                   disabled={loading}
                   className="w-full py-3 text-white/50 hover:text-white font-jakarta text-sm transition-colors"
                 >
