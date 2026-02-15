@@ -42,6 +42,21 @@ export default function OnboardingPage() {
     ? ["photo", "personality", "audio", "channel", "phone"]
     : ["photo", "personality", "audio", "channel"];
   const currentStepIndex = flowSteps.indexOf(step);
+  const isPrimaryDisabled =
+    loading ||
+    (step === "photo" && !selectedPhoto) ||
+    (step === "personality" && !selectedPersonality) ||
+    (step === "audio" && !selectedAudio) ||
+    (step === "channel" && !selectedChannel);
+  const primaryLabel = loading
+    ? step === "phone"
+      ? "Saving..."
+      : "Please wait..."
+    : step === "phone"
+      ? "Complete Setup"
+      : step === "channel" && selectedChannel === "web"
+        ? "Start Chatting"
+        : "Continue";
 
   const handleStepContinue = () => {
     if (step === "photo" && selectedPhoto) {
@@ -181,7 +196,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6">
+    <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 pb-32 md:pb-6">
       <div className="w-full max-w-3xl">
         {/* Logo */}
         <div className="text-center mb-12">
@@ -222,7 +237,7 @@ export default function OnboardingPage() {
               </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:gap-6 md:grid-cols-3">
               {GIRL_PHOTOS.map((photo) => {
                 const isSelected = selectedPhoto === photo.id;
                 return (
@@ -251,7 +266,7 @@ export default function OnboardingPage() {
               })}
             </div>
 
-            <div className="mt-10 text-center">
+            <div className="mt-10 text-center hidden md:block">
               <button
                 onClick={handleStepContinue}
                 disabled={!selectedPhoto || loading}
@@ -285,24 +300,24 @@ export default function OnboardingPage() {
                 <button
                   key={personality.id}
                   onClick={() => setSelectedPersonality(personality.id)}
-                  className={`w-full rounded-2xl border p-5 text-left transition-all duration-300 ${
+                  className={`w-full rounded-2xl border p-4 md:p-5 text-left transition-all duration-300 ${
                     selectedPersonality === personality.id
                       ? "border-white bg-white/10"
                       : "border-white/10 bg-white/5 hover:border-white/30"
                   }`}
                 >
-                  <p className="font-cormorant text-2xl text-white">{personality.name}</p>
+                  <p className="font-cormorant text-xl md:text-2xl text-white">{personality.name}</p>
                   <p className="font-jakarta text-xs uppercase tracking-[0.2em] text-white/50 mt-1">
                     {personality.tagline}
                   </p>
-                  <p className="font-jakarta text-sm text-white/70 mt-3 leading-relaxed">
+                  <p className="font-jakarta text-xs md:text-sm text-white/70 mt-3 leading-relaxed">
                     {personality.description}
                   </p>
                 </button>
               ))}
             </div>
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-10 hidden md:flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={handleBack}
                 disabled={loading}
@@ -365,7 +380,7 @@ export default function OnboardingPage() {
               })}
             </div>
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-10 hidden md:flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={handleBack}
                 disabled={loading}
@@ -407,7 +422,7 @@ export default function OnboardingPage() {
               onSelect={handleChannelSelect}
             />
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-10 hidden md:flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={handleBack}
                 disabled={loading}
@@ -457,7 +472,7 @@ export default function OnboardingPage() {
                 error={phoneError}
               />
 
-              <div className="mt-8 flex flex-col gap-3">
+              <div className="mt-8 hidden md:flex flex-col gap-3">
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
@@ -477,6 +492,34 @@ export default function OnboardingPage() {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+        <div className="w-full max-w-3xl mx-auto flex items-center gap-3">
+          {step !== "photo" && (
+            <button
+              onClick={handleBack}
+              disabled={loading}
+              className="px-5 py-3 rounded-xl border border-white/20 text-white/80 font-jakarta text-sm"
+            >
+              Back
+            </button>
+          )}
+
+          <button
+            onClick={step === "phone" ? handleSubmit : handleStepContinue}
+            disabled={isPrimaryDisabled}
+            className={`
+              flex-1 py-3.5 px-5 rounded-xl font-jakarta font-medium text-sm transition-all duration-300
+              ${!isPrimaryDisabled
+                ? "bg-white text-black hover:bg-white/90"
+                : "bg-white/10 text-white/50 cursor-not-allowed"
+              }
+            `}
+          >
+            {primaryLabel}
+          </button>
+        </div>
       </div>
 
       {/* Custom Animation Styles */}
