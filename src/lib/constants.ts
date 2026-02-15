@@ -195,7 +195,7 @@ export const GIRL_PHOTOS: GirlPhotoOption[] = [
 export const AUDIO_OPTIONS: AudioOption[] = [
   {
     id: "jessica_v3",
-    name: "Jessica(v3)",
+    name: "Jessica",
     src: "/voice_samples/Jessica(v3).mp3",
     description: "Jessica(v3) voice sample",
   },
@@ -213,7 +213,7 @@ export const AUDIO_OPTIONS: AudioOption[] = [
   },
   {
     id: "hina_yandere",
-    name: "Hina Yandere",
+    name: "Hina",
     src: "/voice_samples/hina_yandere.mp3",
     description: "Hina Yandere voice sample",
   },

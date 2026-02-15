@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { AudioPlayer, ChannelSelector, PersonalityCard, PhoneInput } from "@/components/ui";
+import { AudioPlayer, ChannelSelector, PhoneInput } from "@/components/ui";
 import { AUDIO_OPTIONS, COMMUNICATION_CHANNELS, GIRL_PHOTOS, PERSONALITIES } from "@/lib/constants";
 import type {
   AudioOptionId,
   CommunicationChannel,
   GirlPhotoId,
-  Personality,
   PersonalityId,
 } from "@/types";
 
@@ -43,10 +42,6 @@ export default function OnboardingPage() {
     ? ["photo", "personality", "audio", "channel", "phone"]
     : ["photo", "personality", "audio", "channel"];
   const currentStepIndex = flowSteps.indexOf(step);
-
-  const handlePersonalitySelect = (personality: Personality) => {
-    setSelectedPersonality(personality.id);
-  };
 
   const handleStepContinue = () => {
     if (step === "photo" && selectedPhoto) {
@@ -277,14 +272,25 @@ export default function OnboardingPage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-3">
+            <div className="grid gap-4">
               {PERSONALITIES.map((personality) => (
-                <PersonalityCard
+                <button
                   key={personality.id}
-                  personality={personality}
-                  isSelected={selectedPersonality === personality.id}
-                  onSelect={handlePersonalitySelect}
-                />
+                  onClick={() => setSelectedPersonality(personality.id)}
+                  className={`w-full rounded-2xl border p-5 text-left transition-all duration-300 ${
+                    selectedPersonality === personality.id
+                      ? "border-white bg-white/10"
+                      : "border-white/10 bg-white/5 hover:border-white/30"
+                  }`}
+                >
+                  <p className="font-cormorant text-2xl text-white">{personality.name}</p>
+                  <p className="font-jakarta text-xs uppercase tracking-[0.2em] text-white/50 mt-1">
+                    {personality.tagline}
+                  </p>
+                  <p className="font-jakarta text-sm text-white/70 mt-3 leading-relaxed">
+                    {personality.description}
+                  </p>
+                </button>
               ))}
             </div>
 
