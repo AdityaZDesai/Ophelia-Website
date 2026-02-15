@@ -143,11 +143,24 @@ export default function OnboardingPage() {
       if (selectedChannel === "telegram" && data?.authCode) {
         sessionStorage.setItem("telegramAuthCode", data.authCode);
       }
+      if (selectedChannel === "discord") {
+        if (data?.verification_url) {
+          sessionStorage.setItem("discordVerificationUrl", data.verification_url);
+        }
+        if (data?.verification_token) {
+          sessionStorage.setItem("discordVerificationToken", data.verification_token);
+        }
+        if (data?.instructions) {
+          sessionStorage.setItem("discordInstructions", data.instructions);
+        }
+      }
       // Redirect based on selected channel
       if (selectedChannel === "imessage") {
         router.push("/imessage-chat");
       } else if (selectedChannel === "telegram") {
         router.push("/telegram-chat");
+      } else if (selectedChannel === "discord") {
+        router.push("/discord-chat");
       } else {
         router.push("/chat");
       }

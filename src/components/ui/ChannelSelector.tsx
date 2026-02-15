@@ -42,6 +42,14 @@ const ChannelIcon = ({ icon }: { icon: string }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.5 4.5l-6.2 15.1a1 1 0 01-1.8.1l-2.8-4.4-4.8-1.8a1 1 0 01.1-1.9L21.5 4.5z" />
         </svg>
       );
+    case "discord":
+      return (
+        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.3 8.2A12.5 12.5 0 015 8.9C3.6 11 2.9 13.2 3 15.5c1.6 1.2 3.1 1.9 4.7 2.2.4-.5.7-1 .9-1.6-.5-.2-1-.4-1.5-.7.1-.1.2-.2.3-.2 2.9 1.3 6 1.3 8.9 0l.3.2c-.5.3-1 .5-1.5.7.2.6.5 1.1.9 1.6 1.6-.3 3.2-1 4.7-2.2.2-2.6-.8-4.8-2-6.6-1.2 0-2.4-.3-3.4-.7l-.2.3c1 .3 1.8.7 2.5 1.2-2.4-1.1-4.9-1.1-7.2 0 .7-.5 1.5-.9 2.5-1.2l-.2-.3z" />
+          <circle cx="9" cy="13" r="1" fill="currentColor" />
+          <circle cx="15" cy="13" r="1" fill="currentColor" />
+        </svg>
+      );
     default:
       return null;
   }

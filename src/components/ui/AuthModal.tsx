@@ -44,6 +44,8 @@ export function AuthModal({
         return "/whatsapp-chat";
       case "telegram":
         return "/telegram-chat";
+      case "discord":
+        return "/discord-chat";
       default:
         return "/chat";
     }

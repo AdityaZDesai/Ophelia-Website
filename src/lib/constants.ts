@@ -242,6 +242,13 @@ export const COMMUNICATION_CHANNELS: ChannelOption[] = [
     requiresPhone: false,
   },
   {
+    id: "discord",
+    name: "Discord",
+    description: "Connect your Discord account and chat in DMs or your server",
+    icon: "discord",
+    requiresPhone: false,
+  },
+  {
     id: "web",
     name: "Web Chat",
     description: "Chat on the web — no phone needed",
