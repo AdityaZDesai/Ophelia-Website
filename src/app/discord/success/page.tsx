@@ -1,10 +1,11 @@
-"use client";
+interface DiscordSuccessPageProps {
+  searchParams?: {
+    username?: string;
+  };
+}
 
-import { useSearchParams } from "next/navigation";
-
-export default function DiscordSuccessPage() {
-  const searchParams = useSearchParams();
-  const username = searchParams.get("username");
+export default function DiscordSuccessPage({ searchParams }: DiscordSuccessPageProps) {
+  const username = searchParams?.username;
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 py-6 sm:p-6">

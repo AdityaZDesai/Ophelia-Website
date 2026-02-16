@@ -1,8 +1,3 @@
-"use client";
-
-import { useMemo } from "react";
-import { useSearchParams } from "next/navigation";
-
 const ERROR_MESSAGES: Record<string, string> = {
   missing_params: "The verification callback is missing required parameters. Please try again.",
   invalid_token: "Your verification token is invalid or expired. Start onboarding again.",
@@ -15,13 +10,15 @@ const ERROR_MESSAGES: Record<string, string> = {
   server_error: "A server error occurred during Discord verification.",
 };
 
-export default function DiscordErrorPage() {
-  const searchParams = useSearchParams();
-  const errorCode = searchParams.get("error") || "server_error";
+interface DiscordErrorPageProps {
+  searchParams?: {
+    error?: string;
+  };
+}
 
-  const message = useMemo(() => {
-    return ERROR_MESSAGES[errorCode] || "Discord verification failed. Please try again.";
-  }, [errorCode]);
+export default function DiscordErrorPage({ searchParams }: DiscordErrorPageProps) {
+  const errorCode = searchParams?.error || "server_error";
+  const message = ERROR_MESSAGES[errorCode] || "Discord verification failed. Please try again.";
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 py-6 sm:p-6">
