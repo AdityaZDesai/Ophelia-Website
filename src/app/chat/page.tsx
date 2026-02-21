@@ -20,6 +20,7 @@ interface ChatMessage {
   content: string;
   images?: string[];
   audioUrls?: string[];
+  voiceNoteUrl?: string;
 }
 
 interface CachedChatState {
@@ -92,6 +93,22 @@ function toAudioId(value: string | null | undefined): AudioOptionId | null {
   return value as AudioOptionId;
 }
 
+function normalizeVoiceNoteUrl(
+  voiceNote?: MessageResponse["voice_note"]
+): string | undefined {
+  const url =
+    typeof voiceNote === "string"
+      ? voiceNote
+      : voiceNote && typeof voiceNote === "object" && typeof voiceNote.url === "string"
+      ? voiceNote.url
+      : undefined;
+
+  if (!url) return undefined;
+  if (url.startsWith("data:audio/")) return url;
+  if (AUDIO_URL_PATTERN.test(url)) return url;
+  return undefined;
+}
+
 function normalizeAudioUrls(data: {
   audio?: MessageResponse["audio"];
   voice_note?: MessageResponse["voice_note"];
@@ -102,12 +119,7 @@ function normalizeAudioUrls(data: {
       ? data.audio.url
       : undefined;
 
-  const voiceNoteUrl =
-    typeof data.voice_note === "string"
-      ? data.voice_note
-      : data.voice_note && typeof data.voice_note === "object" && typeof data.voice_note.url === "string"
-      ? data.voice_note.url
-      : undefined;
+  const voiceNoteUrl = normalizeVoiceNoteUrl(data.voice_note);
 
   const attachmentAudio =
     data.attachments?.filter(
@@ -167,6 +179,7 @@ function formatHistory(history: ChatSession["history"]): ChatMessage[] {
       voice_note: msg.voice_note,
       attachments: msg.attachments,
     }),
+    voiceNoteUrl: normalizeVoiceNoteUrl(msg.voice_note),
   }));
 }
 
@@ -181,6 +194,7 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
   const [userSelections, setUserSelections] = useState<UserSelections | null>(null);
+  const [failedVoiceNotes, setFailedVoiceNotes] = useState<Record<string, boolean>>({});
 
   // Map personality ID to API persona
   const getPersonaFromPersonality = (personalityId: PersonalityId | null): string => {
@@ -367,6 +381,7 @@ export default function ChatPage() {
         content: response.reply,
         images: normalizeImages(response),
         audioUrls: normalizeAudioUrls(response),
+        voiceNoteUrl: normalizeVoiceNoteUrl(response.voice_note),
       };
       let nextMessages: ChatMessage[] = [];
       setMessages((prev) => {
@@ -479,8 +494,11 @@ export default function ChatPage() {
           ) : (
             <div className="space-y-6">
               {messages.map((msg, idx) => {
-                const hasAssistantVoiceNote =
-                  msg.role === "assistant" && !!msg.audioUrls && msg.audioUrls.length > 0;
+                const hasAssistantVoiceNote = msg.role === "assistant" && !!msg.voiceNoteUrl;
+                const extraAudioUrls =
+                  msg.audioUrls?.filter((url) => url !== msg.voiceNoteUrl) || [];
+                const voiceNoteKey = msg.voiceNoteUrl ? `${idx}:${msg.voiceNoteUrl}` : undefined;
+                const voiceNoteFailed = voiceNoteKey ? !!failedVoiceNotes[voiceNoteKey] : false;
 
                 return (
                   <div
@@ -504,9 +522,31 @@ export default function ChatPage() {
                       {!hasAssistantVoiceNote && (
                         <p className="font-jakarta text-sm whitespace-pre-wrap">{msg.content}</p>
                       )}
-                      {msg.audioUrls && msg.audioUrls.length > 0 && (
+                      {hasAssistantVoiceNote && msg.voiceNoteUrl && (
+                        <div className="space-y-2">
+                          <div className="rounded-lg border border-white/10 bg-black/20 p-2">
+                            {!voiceNoteFailed ? (
+                              <audio
+                                controls
+                                preload="none"
+                                className="w-full"
+                                src={msg.voiceNoteUrl}
+                                onError={() => {
+                                  if (!voiceNoteKey) return;
+                                  setFailedVoiceNotes((prev) => ({ ...prev, [voiceNoteKey]: true }));
+                                }}
+                              />
+                            ) : (
+                              <div className="rounded-md bg-white/5 px-3 py-2 text-xs text-white/70">
+                                Voice note unavailable
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {extraAudioUrls.length > 0 && (
                         <div className="mt-3 space-y-2">
-                          {msg.audioUrls.map((audioUrl, audioIdx) => (
+                          {extraAudioUrls.map((audioUrl, audioIdx) => (
                             <div key={audioIdx} className="rounded-lg border border-white/10 bg-black/20 p-2">
                               <audio controls preload="none" className="w-full" src={audioUrl} />
                             </div>
