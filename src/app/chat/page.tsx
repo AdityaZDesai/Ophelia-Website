@@ -18,6 +18,116 @@ interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   images?: string[];
+  audioUrls?: string[];
+}
+
+interface CachedChatState {
+  sessionId: string;
+  updatedAt: string;
+  messages: ChatMessage[];
+}
+
+interface SessionUser {
+  id?: string;
+  selectedPersonality?: PersonalityId | null;
+}
+
+const AUDIO_URL_PATTERN = /\.(mp3|wav|m4a|ogg|webm)(\?|$)/i;
+
+function getCacheKey(userId: string): string {
+  return `chat0-cache:${userId}`;
+}
+
+function readChatCache(userId: string): CachedChatState | null {
+  try {
+    const raw = localStorage.getItem(getCacheKey(userId));
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as CachedChatState;
+    if (!parsed || typeof parsed !== "object") return null;
+    if (!parsed.sessionId || !Array.isArray(parsed.messages) || !parsed.updatedAt) return null;
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeChatCache(userId: string, data: CachedChatState): void {
+  try {
+    localStorage.setItem(getCacheKey(userId), JSON.stringify(data));
+  } catch {
+    // Ignore localStorage write errors (private mode, quota exceeded)
+  }
+}
+
+function normalizeAudioUrls(data: {
+  audio?: MessageResponse["audio"];
+  attachments?: MessageResponse["attachments"];
+}): string[] | undefined {
+  const directAudio =
+    data.audio && typeof data.audio === "object" && typeof data.audio.url === "string"
+      ? data.audio.url
+      : undefined;
+
+  const attachmentAudio =
+    data.attachments?.filter(
+      (attachment): attachment is string =>
+        typeof attachment === "string" &&
+        (attachment.startsWith("data:audio/") || AUDIO_URL_PATTERN.test(attachment))
+    ) || [];
+
+  const allAudio = [directAudio, ...attachmentAudio].filter(
+    (url): url is string => typeof url === "string" && url.length > 0
+  );
+  const uniqueAudio = Array.from(new Set(allAudio));
+
+  return uniqueAudio.length > 0 ? uniqueAudio : undefined;
+}
+
+function normalizeImages(data: {
+  image?: MessageResponse["image"];
+  images?: MessageResponse["images"];
+  attachments?: MessageResponse["attachments"];
+}): string[] | undefined {
+  const imageUrl =
+    typeof data.image === "string"
+      ? data.image
+      : data.image && typeof data.image === "object"
+      ? data.image.url
+      : undefined;
+
+  const images = data.images?.filter((img) => typeof img === "string") || [];
+  const attachments =
+    data.attachments?.filter(
+      (attachment): attachment is string =>
+        typeof attachment === "string" &&
+        !attachment.startsWith("data:audio/") &&
+        !AUDIO_URL_PATTERN.test(attachment)
+    ) || [];
+
+  const allImages = [imageUrl, ...images, ...attachments].filter(
+    (img): img is string => typeof img === "string" && img.length > 0
+  );
+  const uniqueImages = Array.from(new Set(allImages));
+
+  return uniqueImages.length > 0 ? uniqueImages : undefined;
+}
+
+function formatHistory(history: ChatSession["history"]): ChatMessage[] {
+  return history.map((msg: ChatSession["history"][number]) => ({
+    role: msg.role as "user" | "assistant",
+    content: msg.content,
+    images: normalizeImages({
+      image: msg.image,
+      images: msg.images,
+      attachments: msg.attachments,
+    }),
+    audioUrls: normalizeAudioUrls({
+      audio: msg.audio,
+      attachments: msg.attachments,
+    }),
+  }));
 }
 
 export default function ChatPage() {
@@ -45,7 +155,8 @@ export default function ChatPage() {
   };
 
   // Get personality data
-  const personalityId = (session?.user as any)?.selectedPersonality as PersonalityId | null;
+  const sessionUser = session?.user as SessionUser | undefined;
+  const personalityId = sessionUser?.selectedPersonality ?? null;
   const personality = personalityId
     ? PERSONALITIES.find((p) => p.id === personalityId)
     : PERSONALITIES[0]; // Default to first personality
@@ -53,52 +164,80 @@ export default function ChatPage() {
   // Initialize session on mount
   useEffect(() => {
     if (isPending || !session) return;
+    const currentSession = session;
 
     async function initializeSession() {
       try {
         setInitializing(true);
         setError(null);
+        const userId = (currentSession.user as SessionUser | undefined)?.id;
+        const cached = userId ? readChatCache(userId) : null;
+
+        if (cached?.messages.length) {
+          setMessages(cached.messages);
+        }
 
         // Try to get existing sessions first
-        let session: ChatSession;
-        try {
-          const existingSessions = await listSessions();
-          if (existingSessions.length > 0) {
-            // Load the most recent session
-            session = await getSession(existingSessions[0].session_id);
-          } else {
-            // Create a new session with user's personality
-            const persona = getPersonaFromPersonality(personalityId);
-            session = await createSession({
-              name: "babe",
-              persona: persona,
-              audio_enabled: false,
-            });
+        let activeSession: ChatSession | null = null;
+
+        if (cached?.sessionId) {
+          try {
+            activeSession = await getSession(cached.sessionId);
+          } catch {
+            activeSession = null;
           }
-        } catch (listError) {
+        }
+
+        try {
+          if (!activeSession) {
+            const existingSessions = await listSessions();
+            if (existingSessions.length > 0) {
+              // Load the most recent session
+              activeSession = await getSession(existingSessions[0].session_id);
+            } else {
+              // Create a new session with user's personality
+              const persona = getPersonaFromPersonality(personalityId);
+              activeSession = await createSession({
+                name: "babe",
+                persona: persona,
+                audio_enabled: false,
+              });
+            }
+          }
+        } catch {
           // If listing fails, try creating a new session
           const persona = getPersonaFromPersonality(personalityId);
-          session = await createSession({
+          activeSession = await createSession({
             name: "babe",
             persona: persona,
             audio_enabled: false,
           });
         }
 
-        setChatSession(session);
+        if (!activeSession) {
+          throw new Error("Could not initialize chat session");
+        }
+
+        setChatSession(activeSession);
 
         // Load conversation history
-        if (session.history && session.history.length > 0) {
-          const formattedMessages: ChatMessage[] = session.history.map((msg: any) => ({
-            role: msg.role as "user" | "assistant",
-            content: msg.content,
-            images: normalizeImages({
-              image: msg.image,
-              images: msg.images,
-              attachments: msg.attachments,
-            }),
-          }));
+        if (activeSession.history && activeSession.history.length > 0) {
+          const formattedMessages = formatHistory(activeSession.history);
           setMessages(formattedMessages);
+
+          if (userId) {
+            writeChatCache(userId, {
+              sessionId: activeSession.session_id,
+              updatedAt: activeSession.updated_at,
+              messages: formattedMessages,
+            });
+          }
+        } else if (userId) {
+          writeChatCache(userId, {
+            sessionId: activeSession.session_id,
+            updatedAt: activeSession.updated_at,
+            messages: [],
+          });
         }
       } catch (err) {
         console.error("Failed to initialize session:", err);
@@ -122,30 +261,6 @@ export default function ChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const normalizeImages = (data: {
-    image?: MessageResponse["image"];
-    images?: MessageResponse["images"];
-    attachments?: MessageResponse["attachments"];
-  }): string[] | undefined => {
-    const imageUrl =
-      typeof data.image === "string"
-        ? data.image
-        : data.image && typeof data.image === "object"
-        ? data.image.url
-        : undefined;
-
-    const images = data.images?.filter((img) => typeof img === "string") || [];
-    const attachments =
-      data.attachments?.filter((attachment) => typeof attachment === "string") || [];
-
-    const allImages = [imageUrl, ...images, ...attachments].filter(
-      (img): img is string => typeof img === "string" && img.length > 0
-    );
-    const uniqueImages = Array.from(new Set(allImages));
-
-    return uniqueImages.length > 0 ? uniqueImages : undefined;
-  };
 
   const handleSend = async () => {
     if (!input.trim() || !chatSession || loading) return;
@@ -174,8 +289,22 @@ export default function ChatPage() {
         role: "assistant",
         content: response.reply,
         images: normalizeImages(response),
+        audioUrls: normalizeAudioUrls(response),
       };
-      setMessages((prev) => [...prev, assistantMsg]);
+      let nextMessages: ChatMessage[] = [];
+      setMessages((prev) => {
+        nextMessages = [...prev, assistantMsg];
+        return nextMessages;
+      });
+
+      const userId = (session?.user as SessionUser | undefined)?.id;
+      if (userId) {
+        writeChatCache(userId, {
+          sessionId: chatSession.session_id,
+          updatedAt: new Date().toISOString(),
+          messages: nextMessages,
+        });
+      }
     } catch (err) {
       console.error("Failed to send message:", err);
       setError(err instanceof Error ? err.message : "Failed to send message. Please try again.");
@@ -193,7 +322,7 @@ export default function ChatPage() {
     }
   };
 
-  if (isPending || initializing) {
+  if (isPending || (initializing && messages.length === 0)) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="animate-pulse text-white/50 font-jakarta">Loading...</div>
@@ -288,6 +417,15 @@ export default function ChatPage() {
                     }
                   >
                     <p className="font-jakarta text-sm whitespace-pre-wrap">{msg.content}</p>
+                    {msg.audioUrls && msg.audioUrls.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {msg.audioUrls.map((audioUrl, audioIdx) => (
+                          <div key={audioIdx} className="rounded-lg border border-white/10 bg-black/20 p-2">
+                            <audio controls preload="none" className="w-full" src={audioUrl} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     {msg.images && msg.images.length > 0 && (
                       <div className="mt-3 space-y-2">
                         {msg.images.map((img, imgIdx) => (

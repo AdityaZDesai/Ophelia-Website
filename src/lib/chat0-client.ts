@@ -16,6 +16,7 @@ export interface ChatSession {
     image?: MessageResponse["image"];
     images?: MessageResponse["images"];
     attachments?: MessageResponse["attachments"];
+    audio?: MessageResponse["audio"];
   }>;
   created_at: string;
   updated_at: string;
