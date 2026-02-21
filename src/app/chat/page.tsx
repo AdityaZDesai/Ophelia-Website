@@ -11,8 +11,8 @@ import {
   type ChatSession,
   type MessageResponse,
 } from "@/lib/chat0-client";
-import { PERSONALITIES } from "@/lib/constants";
-import type { PersonalityId } from "@/types";
+import { AUDIO_OPTIONS, GIRL_PHOTOS, PERSONALITIES } from "@/lib/constants";
+import type { AudioOptionId, GirlPhotoId, PersonalityId } from "@/types";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -32,7 +32,22 @@ interface SessionUser {
   selectedPersonality?: PersonalityId | null;
 }
 
+interface UserSelections {
+  selectedPersonality: PersonalityId | null;
+  selectedPhoto: GirlPhotoId | null;
+  selectedAudio: AudioOptionId | null;
+}
+
+interface UserStatusResponse {
+  selectedPersonality?: string | null;
+  selectedPhoto?: string | null;
+  selectedAudio?: string | null;
+}
+
 const AUDIO_URL_PATTERN = /\.(mp3|wav|m4a|ogg|webm)(\?|$)/i;
+const PERSONALITY_IDS = new Set(PERSONALITIES.map((personality) => personality.id));
+const PHOTO_IDS = new Set(GIRL_PHOTOS.map((photo) => photo.id));
+const AUDIO_IDS = new Set(AUDIO_OPTIONS.map((audio) => audio.id));
 
 function getCacheKey(userId: string): string {
   return `chat0-cache:${userId}`;
@@ -59,6 +74,21 @@ function writeChatCache(userId: string, data: CachedChatState): void {
   } catch {
     // Ignore localStorage write errors (private mode, quota exceeded)
   }
+}
+
+function toPersonalityId(value: string | null | undefined): PersonalityId | null {
+  if (!value || !PERSONALITY_IDS.has(value as PersonalityId)) return null;
+  return value as PersonalityId;
+}
+
+function toPhotoId(value: string | null | undefined): GirlPhotoId | null {
+  if (!value || !PHOTO_IDS.has(value as GirlPhotoId)) return null;
+  return value as GirlPhotoId;
+}
+
+function toAudioId(value: string | null | undefined): AudioOptionId | null {
+  if (!value || !AUDIO_IDS.has(value as AudioOptionId)) return null;
+  return value as AudioOptionId;
 }
 
 function normalizeAudioUrls(data: {
@@ -140,6 +170,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
+  const [userSelections, setUserSelections] = useState<UserSelections | null>(null);
 
   // Map personality ID to API persona
   const getPersonaFromPersonality = (personalityId: PersonalityId | null): string => {
@@ -156,10 +187,18 @@ export default function ChatPage() {
 
   // Get personality data
   const sessionUser = session?.user as SessionUser | undefined;
-  const personalityId = sessionUser?.selectedPersonality ?? null;
+  const personalityId = userSelections?.selectedPersonality ?? sessionUser?.selectedPersonality ?? null;
   const personality = personalityId
     ? PERSONALITIES.find((p) => p.id === personalityId)
     : PERSONALITIES[0]; // Default to first personality
+  const selectedPhotoId = userSelections?.selectedPhoto ?? null;
+  const selectedPhoto = selectedPhotoId
+    ? GIRL_PHOTOS.find((photo) => photo.id === selectedPhotoId)
+    : null;
+  const selectedAudioId = userSelections?.selectedAudio ?? null;
+  const selectedAudio = selectedAudioId
+    ? AUDIO_OPTIONS.find((audio) => audio.id === selectedAudioId)
+    : null;
 
   // Initialize session on mount
   useEffect(() => {
@@ -172,6 +211,30 @@ export default function ChatPage() {
         setError(null);
         const userId = (currentSession.user as SessionUser | undefined)?.id;
         const cached = userId ? readChatCache(userId) : null;
+        let resolvedPersonalityId = toPersonalityId(
+          (currentSession.user as SessionUser | undefined)?.selectedPersonality ?? null
+        );
+
+        try {
+          const statusResponse = await fetch("/api/user/status", {
+            method: "GET",
+            cache: "no-store",
+          });
+
+          if (statusResponse.ok) {
+            const status = (await statusResponse.json()) as UserStatusResponse;
+            const nextSelections: UserSelections = {
+              selectedPersonality: toPersonalityId(status.selectedPersonality),
+              selectedPhoto: toPhotoId(status.selectedPhoto),
+              selectedAudio: toAudioId(status.selectedAudio),
+            };
+
+            resolvedPersonalityId = nextSelections.selectedPersonality ?? resolvedPersonalityId;
+            setUserSelections(nextSelections);
+          }
+        } catch (statusError) {
+          console.error("Failed to fetch user selections:", statusError);
+        }
 
         if (cached?.messages.length) {
           setMessages(cached.messages);
@@ -196,7 +259,7 @@ export default function ChatPage() {
               activeSession = await getSession(existingSessions[0].session_id);
             } else {
               // Create a new session with user's personality
-              const persona = getPersonaFromPersonality(personalityId);
+              const persona = getPersonaFromPersonality(resolvedPersonalityId);
               activeSession = await createSession({
                 name: "babe",
                 persona: persona,
@@ -206,7 +269,7 @@ export default function ChatPage() {
           }
         } catch {
           // If listing fails, try creating a new session
-          const persona = getPersonaFromPersonality(personalityId);
+          const persona = getPersonaFromPersonality(resolvedPersonalityId);
           activeSession = await createSession({
             name: "babe",
             persona: persona,
@@ -248,7 +311,7 @@ export default function ChatPage() {
     }
 
     initializeSession();
-  }, [session, isPending, personalityId]);
+  }, [session, isPending]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -349,10 +412,10 @@ export default function ChatPage() {
                     : "linear-gradient(135deg, #f59e0b40, #f59e0b20)",
                 }}
               >
-                {personality ? (
+                {selectedPhoto || personality ? (
                   <img
-                    src={personality.image}
-                    alt={personality.name}
+                    src={selectedPhoto?.image || personality?.image}
+                    alt={selectedPhoto?.name || personality?.name || "Profile"}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -362,7 +425,11 @@ export default function ChatPage() {
               <div>
                 <p className="font-cormorant text-xl text-white">{personality?.name || "Serena"}</p>
                 <p className="font-jakarta text-xs text-white/50">
-                  {chatSession ? "Online" : "Connecting..."}
+                  {chatSession
+                    ? selectedAudio
+                      ? `Online · ${selectedAudio.name} voice`
+                      : "Online"
+                    : "Connecting..."}
                 </p>
               </div>
             </div>
