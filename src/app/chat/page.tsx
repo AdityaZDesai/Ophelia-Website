@@ -8,6 +8,7 @@ import {
   getSession,
   listSessions,
   sendMessage,
+  updateSession,
   type ChatSession,
   type MessageResponse,
 } from "@/lib/chat0-client";
@@ -263,7 +264,7 @@ export default function ChatPage() {
               activeSession = await createSession({
                 name: "babe",
                 persona: persona,
-                audio_enabled: false,
+                audio_enabled: true,
               });
             }
           }
@@ -273,12 +274,16 @@ export default function ChatPage() {
           activeSession = await createSession({
             name: "babe",
             persona: persona,
-            audio_enabled: false,
+            audio_enabled: true,
           });
         }
 
         if (!activeSession) {
           throw new Error("Could not initialize chat session");
+        }
+
+        if (!activeSession.audio_enabled) {
+          activeSession = await updateSession(activeSession.session_id, { audio_enabled: true });
         }
 
         setChatSession(activeSession);
