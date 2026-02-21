@@ -478,62 +478,69 @@ export default function ChatPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
+              {messages.map((msg, idx) => {
+                const hasAssistantVoiceNote =
+                  msg.role === "assistant" && !!msg.audioUrls && msg.audioUrls.length > 0;
+
+                return (
                   <div
-                    className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-4 ${
-                      msg.role === "user"
-                        ? "bg-white/10 text-white"
-                        : "bg-white/5 text-white/90 border border-white/10"
-                    }`}
-                    style={
-                      msg.role === "assistant" && personality
-                        ? {
-                            borderColor: `${personality.accentColor}30`,
-                          }
-                        : undefined
-                    }
+                    key={idx}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
-                    <p className="font-jakarta text-sm whitespace-pre-wrap">{msg.content}</p>
-                    {msg.audioUrls && msg.audioUrls.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        {msg.audioUrls.map((audioUrl, audioIdx) => (
-                          <div key={audioIdx} className="rounded-lg border border-white/10 bg-black/20 p-2">
-                            <audio controls preload="none" className="w-full" src={audioUrl} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {msg.images && msg.images.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        {msg.images.map((img, imgIdx) => (
-                          <div key={imgIdx} className="rounded-lg overflow-hidden">
-                            {typeof img === "string" &&
-                            (img.startsWith("data:image") || img.startsWith("http")) ? (
-                              <img
-                                src={img}
-                                alt={`Image ${imgIdx + 1}`}
-                                className="max-w-full h-auto"
-                                onError={(e) => {
-                                  console.error("Failed to load image:", img);
-                                  (e.target as HTMLImageElement).style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              <div className="p-4 bg-white/5 rounded text-white/50 text-xs">
-                                Image data: {img.substring(0, 50)}...
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <div
+                      className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-4 ${
+                        msg.role === "user"
+                          ? "bg-white/10 text-white"
+                          : "bg-white/5 text-white/90 border border-white/10"
+                      }`}
+                      style={
+                        msg.role === "assistant" && personality
+                          ? {
+                              borderColor: `${personality.accentColor}30`,
+                            }
+                          : undefined
+                      }
+                    >
+                      {!hasAssistantVoiceNote && (
+                        <p className="font-jakarta text-sm whitespace-pre-wrap">{msg.content}</p>
+                      )}
+                      {msg.audioUrls && msg.audioUrls.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          {msg.audioUrls.map((audioUrl, audioIdx) => (
+                            <div key={audioIdx} className="rounded-lg border border-white/10 bg-black/20 p-2">
+                              <audio controls preload="none" className="w-full" src={audioUrl} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {msg.images && msg.images.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          {msg.images.map((img, imgIdx) => (
+                            <div key={imgIdx} className="rounded-lg overflow-hidden">
+                              {typeof img === "string" &&
+                              (img.startsWith("data:image") || img.startsWith("http")) ? (
+                                <img
+                                  src={img}
+                                  alt={`Image ${imgIdx + 1}`}
+                                  className="max-w-full h-auto"
+                                  onError={(e) => {
+                                    console.error("Failed to load image:", img);
+                                    (e.target as HTMLImageElement).style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <div className="p-4 bg-white/5 rounded text-white/50 text-xs">
+                                  Image data: {img.substring(0, 50)}...
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
