@@ -85,8 +85,8 @@ export function Personalities() {
             </div>
             <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
               <AudioPlayer
-                src="/voice_samples/Jessica(v3).mp3"
-                name="Jessica"
+                src="/voice_samples/kuon.mp3"
+                name="Kuon"
               />
               <AudioPlayer
                 src="/voice_samples/Serafina.mp3"
