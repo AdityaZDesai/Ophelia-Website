@@ -499,6 +499,9 @@ export default function ChatPage() {
                   msg.audioUrls?.filter((url) => url !== msg.voiceNoteUrl) || [];
                 const voiceNoteKey = msg.voiceNoteUrl ? `${idx}:${msg.voiceNoteUrl}` : undefined;
                 const voiceNoteFailed = voiceNoteKey ? !!failedVoiceNotes[voiceNoteKey] : false;
+                const bubbleWidthClass = hasAssistantVoiceNote
+                  ? "w-full max-w-md sm:max-w-lg"
+                  : "max-w-[88%] sm:max-w-[80%]";
 
                 return (
                   <div
@@ -506,7 +509,7 @@ export default function ChatPage() {
                     className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-4 ${
+                      className={`${bubbleWidthClass} rounded-2xl p-4 ${
                         msg.role === "user"
                           ? "bg-white/10 text-white"
                           : "bg-white/5 text-white/90 border border-white/10"
@@ -524,7 +527,7 @@ export default function ChatPage() {
                       )}
                       {hasAssistantVoiceNote && msg.voiceNoteUrl && (
                         <div className="space-y-2">
-                          <div className="rounded-lg border border-white/10 bg-black/20 p-2">
+                          <div className="min-w-[260px] rounded-lg border border-white/10 bg-black/20 p-2">
                             {!voiceNoteFailed ? (
                               <audio
                                 controls
@@ -537,8 +540,18 @@ export default function ChatPage() {
                                 }}
                               />
                             ) : (
-                              <div className="rounded-md bg-white/5 px-3 py-2 text-xs text-white/70">
-                                Voice note unavailable
+                              <div className="space-y-2">
+                                <div className="rounded-md bg-white/5 px-3 py-2 text-xs text-white/70">
+                                  Voice note unavailable
+                                </div>
+                                <a
+                                  href={msg.voiceNoteUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-block text-xs text-white/80 underline hover:text-white"
+                                >
+                                  Open audio
+                                </a>
                               </div>
                             )}
                           </div>
