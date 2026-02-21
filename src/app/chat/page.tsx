@@ -94,11 +94,19 @@ function toAudioId(value: string | null | undefined): AudioOptionId | null {
 
 function normalizeAudioUrls(data: {
   audio?: MessageResponse["audio"];
+  voice_note?: MessageResponse["voice_note"];
   attachments?: MessageResponse["attachments"];
 }): string[] | undefined {
   const directAudio =
     data.audio && typeof data.audio === "object" && typeof data.audio.url === "string"
       ? data.audio.url
+      : undefined;
+
+  const voiceNoteUrl =
+    typeof data.voice_note === "string"
+      ? data.voice_note
+      : data.voice_note && typeof data.voice_note === "object" && typeof data.voice_note.url === "string"
+      ? data.voice_note.url
       : undefined;
 
   const attachmentAudio =
@@ -108,7 +116,7 @@ function normalizeAudioUrls(data: {
         (attachment.startsWith("data:audio/") || AUDIO_URL_PATTERN.test(attachment))
     ) || [];
 
-  const allAudio = [directAudio, ...attachmentAudio].filter(
+  const allAudio = [directAudio, voiceNoteUrl, ...attachmentAudio].filter(
     (url): url is string => typeof url === "string" && url.length > 0
   );
   const uniqueAudio = Array.from(new Set(allAudio));
@@ -156,6 +164,7 @@ function formatHistory(history: ChatSession["history"]): ChatMessage[] {
     }),
     audioUrls: normalizeAudioUrls({
       audio: msg.audio,
+      voice_note: msg.voice_note,
       attachments: msg.attachments,
     }),
   }));
