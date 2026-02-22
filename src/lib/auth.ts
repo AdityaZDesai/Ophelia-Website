@@ -28,6 +28,41 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+const sendSignupDiscordNotification = async (user: {
+  id?: string;
+  email?: string;
+  name?: string;
+}) => {
+  const webhookUrl = process.env.DISCORD_SIGNUP_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    return;
+  }
+
+  try {
+    const timestamp = new Date().toISOString();
+    const content = [
+      "New user signup",
+      `Email: ${user.email || "unknown"}`,
+      `Name: ${user.name || "unknown"}`,
+      `User ID: ${user.id || "unknown"}`,
+      `Created: ${timestamp}`,
+    ].join("\n");
+
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content,
+      }),
+    });
+  } catch (error) {
+    console.error("Failed to send Discord signup webhook:", error);
+  }
+};
+
 export const auth = betterAuth({
   database: pool,
   trustedOrigins: [
@@ -87,6 +122,19 @@ export const auth = betterAuth({
         type: "boolean",
         required: false,
         defaultValue: false,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await sendSignupDiscordNotification({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          });
+        },
       },
     },
   },
