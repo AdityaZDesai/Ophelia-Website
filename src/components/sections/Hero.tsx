@@ -4,11 +4,6 @@ export function Hero() {
   return (
     <section className="relative pt-32 md:pt-36 pb-16 overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-rose/30 rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-pulse-soft delay-700" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cream rounded-full blur-3xl opacity-60" />
-        <div className="absolute -top-8 right-[12%] w-64 h-64 rounded-full border border-accent/20" />
-        <div className="absolute bottom-6 left-[14%] w-48 h-48 rounded-full border border-rose/25" />
         <div className="hidden md:block absolute top-40 right-8 rounded-2xl bg-white/65 border border-accent/20 px-4 py-3 shadow-lg rotate-3 animate-float">
           <p className="text-xs tracking-[0.2em] uppercase text-text-muted">iMessage</p>
           <p className="font-serif text-lg leading-none mt-1">Hey, I&apos;m here.</p>
