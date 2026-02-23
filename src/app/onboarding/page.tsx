@@ -161,12 +161,15 @@ export default function OnboardingPage() {
       if (selectedChannel === "discord") {
         if (data?.verification_url) {
           sessionStorage.setItem("discordVerificationUrl", data.verification_url);
+          localStorage.setItem("discordVerificationUrl", data.verification_url);
         }
         if (data?.verification_token) {
           sessionStorage.setItem("discordVerificationToken", data.verification_token);
+          localStorage.setItem("discordVerificationToken", data.verification_token);
         }
         if (data?.instructions) {
           sessionStorage.setItem("discordInstructions", data.instructions);
+          localStorage.setItem("discordInstructions", data.instructions);
         }
       }
       // Redirect based on selected channel

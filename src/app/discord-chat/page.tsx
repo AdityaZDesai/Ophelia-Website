@@ -17,12 +17,18 @@ export default function DiscordChatPage() {
 
   const verificationUrl = useMemo(() => {
     if (typeof window === "undefined") return null;
-    return sessionStorage.getItem("discordVerificationUrl");
+    return (
+      localStorage.getItem("discordVerificationUrl") ||
+      sessionStorage.getItem("discordVerificationUrl")
+    );
   }, []);
 
   const instructions = useMemo(() => {
     if (typeof window === "undefined") return null;
-    return sessionStorage.getItem("discordInstructions");
+    return (
+      localStorage.getItem("discordInstructions") ||
+      sessionStorage.getItem("discordInstructions")
+    );
   }, []);
 
   useEffect(() => {
