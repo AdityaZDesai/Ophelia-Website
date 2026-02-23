@@ -483,6 +483,13 @@ export default function ChatPage() {
               <div className="mt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
                 <button
                   type="button"
+                  onClick={() => router.push("/")}
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-white/25 text-white font-jakarta text-sm font-medium hover:bg-white/10 transition-all"
+                >
+                  Back to Website
+                </button>
+                <button
+                  type="button"
                   onClick={() => router.push("/onboarding?edit=1")}
                   className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white text-black font-jakarta text-sm font-semibold hover:bg-white/90 transition-all shadow-md shadow-white/10"
                 >

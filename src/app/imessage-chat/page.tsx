@@ -125,6 +125,13 @@ export default function IMessageChatPage() {
               <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
                   type="button"
+                  onClick={() => router.push("/")}
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-white/25 text-white font-jakarta text-sm font-medium hover:bg-white/10 transition-all"
+                >
+                  Back to Website
+                </button>
+                <button
+                  type="button"
                   onClick={() => router.push("/onboarding?edit=1")}
                   className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-jakarta text-sm font-semibold hover:bg-white/90 transition-all shadow-md shadow-white/10"
                 >
