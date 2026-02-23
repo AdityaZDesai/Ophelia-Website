@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { AudioPlayer, ChannelSelector, PhoneInput } from "@/components/ui";
@@ -14,7 +14,7 @@ import type {
 
 type OnboardingStep = "photo" | "personality" | "audio" | "channel" | "phone";
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, isPending } = useSession();
@@ -607,5 +607,19 @@ export default function OnboardingPage() {
         }
       `}</style>
     </main>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+          <div className="animate-pulse text-white/50 font-jakarta">Loading...</div>
+        </div>
+      }
+    >
+      <OnboardingContent />
+    </Suspense>
   );
 }
