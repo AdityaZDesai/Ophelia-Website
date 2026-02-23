@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -191,6 +191,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
   const [userSelections, setUserSelections] = useState<UserSelections | null>(null);
@@ -414,6 +415,21 @@ export default function ChatPage() {
     }
   };
 
+  const handleLogout = async () => {
+    if (loggingOut) return;
+
+    try {
+      setLoggingOut(true);
+      await signOut();
+      router.push("/");
+    } catch (error) {
+      console.error("Failed to sign out:", error);
+      setError("Failed to log out. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
   if (isPending || (initializing && messages.length === 0)) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
@@ -464,13 +480,23 @@ export default function ChatPage() {
             </div>
             <div className="text-right">
               <h1 className="font-cormorant text-2xl text-white">harmonica</h1>
-              <button
-                type="button"
-                onClick={() => router.push("/onboarding?edit=1")}
-                className="mt-1 font-jakarta text-xs text-white/60 hover:text-white transition-colors"
-              >
-                Edit setup
-              </button>
+              <div className="mt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push("/onboarding?edit=1")}
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white text-black font-jakarta text-sm font-semibold hover:bg-white/90 transition-all shadow-md shadow-white/10"
+                >
+                  Edit Setup
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-red-400/50 text-red-300 font-jakarta text-sm font-medium hover:bg-red-500/10 hover:text-red-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loggingOut ? "Logging out..." : "Logout"}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 
 const TELEGRAM_BOT_USERNAME =
   process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "LoveHarmonica_bot";
@@ -10,6 +10,7 @@ const TELEGRAM_BOT_USERNAME =
 export default function TelegramChatPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
+  const [loggingOut, setLoggingOut] = useState(false);
   const [authCode] = useState<string | null>(() => {
     if (typeof window === "undefined") {
       return null;
@@ -31,6 +32,18 @@ export default function TelegramChatPage() {
       router.push("/");
     }
   }, [session, isPending, router]);
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+
+    try {
+      setLoggingOut(true);
+      await signOut();
+      router.push("/");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   if (isPending) {
     return (
@@ -99,13 +112,21 @@ export default function TelegramChatPage() {
                 Bot: @{TELEGRAM_BOT_USERNAME}
               </p>
 
-              <div className="mt-3">
+              <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
                   type="button"
                   onClick={() => router.push("/onboarding?edit=1")}
-                  className="font-jakarta text-xs text-white/60 hover:text-white transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-jakarta text-sm font-semibold hover:bg-white/90 transition-all shadow-md shadow-white/10"
                 >
-                  Edit setup
+                  Edit Setup
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-red-400/50 text-red-300 font-jakarta text-sm font-medium hover:bg-red-500/10 hover:text-red-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loggingOut ? "Logging out..." : "Logout"}
                 </button>
               </div>
             </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 
 interface DiscordInviteResponse {
   invite_url?: string;
@@ -14,6 +14,7 @@ export default function DiscordChatPage() {
   const { data: session, isPending } = useSession();
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const verificationUrl = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -60,6 +61,18 @@ export default function DiscordChatPage() {
 
     fetchInvite();
   }, []);
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+
+    try {
+      setLoggingOut(true);
+      await signOut();
+      router.push("/");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   if (isPending) {
     return (
@@ -158,13 +171,23 @@ export default function DiscordChatPage() {
                   "Once linked, message the bot in DM, mention it in your server, or enable all-message mode on the backend if configured."}
               </p>
 
-              <button
-                type="button"
-                onClick={() => router.push("/onboarding?edit=1")}
-                className="mt-3 font-jakarta text-xs text-white/60 hover:text-white transition-colors"
-              >
-                Edit setup
-              </button>
+              <div className="mt-5 flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/onboarding?edit=1")}
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-jakarta text-sm font-semibold hover:bg-white/90 transition-all shadow-md shadow-white/10"
+                >
+                  Edit Setup
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-red-400/50 text-red-300 font-jakarta text-sm font-medium hover:bg-red-500/10 hover:text-red-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loggingOut ? "Logging out..." : "Logout"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
