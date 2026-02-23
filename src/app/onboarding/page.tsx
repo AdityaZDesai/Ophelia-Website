@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { AudioPlayer, ChannelSelector, PhoneInput } from "@/components/ui";
 import { AUDIO_OPTIONS, COMMUNICATION_CHANNELS, GIRL_PHOTOS, PERSONALITIES } from "@/lib/constants";
@@ -16,7 +16,9 @@ type OnboardingStep = "photo" | "personality" | "audio" | "channel" | "phone";
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, isPending } = useSession();
+  const isEditMode = searchParams.get("edit") === "1";
   
   const [step, setStep] = useState<OnboardingStep>("photo");
   const [selectedPhoto, setSelectedPhoto] = useState<GirlPhotoId | null>(null);
@@ -26,6 +28,7 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [selectedPersonality, setSelectedPersonality] = useState<PersonalityId | null>(null);
   const [selectedAudio, setSelectedAudio] = useState<AudioOptionId | null>(null);
+  const [isLoadingExistingSelections, setIsLoadingExistingSelections] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -33,6 +36,53 @@ export default function OnboardingPage() {
       router.push("/");
     }
   }, [session, isPending, router]);
+
+  useEffect(() => {
+    if (!isEditMode || isPending || !session) return;
+
+    const loadExistingSelections = async () => {
+      try {
+        setIsLoadingExistingSelections(true);
+        const response = await fetch("/api/user/status", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const status = await response.json();
+        const validChannels: CommunicationChannel[] = ["imessage", "web", "telegram", "discord"];
+
+        if (status?.selectedPhoto) {
+          setSelectedPhoto(status.selectedPhoto as GirlPhotoId);
+        }
+
+        if (status?.selectedPersonality) {
+          setSelectedPersonality(status.selectedPersonality as PersonalityId);
+        }
+
+        if (status?.selectedAudio) {
+          setSelectedAudio(status.selectedAudio as AudioOptionId);
+        }
+
+        if (status?.communicationChannel && validChannels.includes(status.communicationChannel as CommunicationChannel)) {
+          setSelectedChannel(status.communicationChannel as CommunicationChannel);
+        }
+
+        if (typeof status?.phone === "string") {
+          setPhone(status.phone);
+        }
+      } catch (error) {
+        console.error("Failed to load existing onboarding selections:", error);
+      } finally {
+        setIsLoadingExistingSelections(false);
+      }
+    };
+
+    loadExistingSelections();
+  }, [isEditMode, isPending, session]);
 
   const personalityData = PERSONALITIES.find((p) => p.id === selectedPersonality);
 
@@ -53,7 +103,9 @@ export default function OnboardingPage() {
       ? "Saving..."
       : "Please wait..."
     : step === "phone"
-      ? "Complete Setup"
+      ? isEditMode
+        ? "Update Setup"
+        : "Complete Setup"
       : step === "channel" && selectedChannel === "web"
         ? "Start Chatting"
         : "Continue";
@@ -198,6 +250,14 @@ export default function OnboardingPage() {
     );
   }
 
+  if (isLoadingExistingSelections) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="animate-pulse text-white/50 font-jakarta">Loading your setup...</div>
+      </div>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 pb-32 md:pb-6">
       <div className="w-full max-w-3xl">
@@ -206,6 +266,11 @@ export default function OnboardingPage() {
           <h1 className="font-cormorant text-3xl md:text-4xl text-white tracking-wide">
             Ophelia
           </h1>
+          {isEditMode && (
+            <p className="font-jakarta text-white/60 text-xs mt-2 tracking-wide uppercase">
+              Edit your setup
+            </p>
+          )}
           {personalityData && (
             <p
               className="font-jakarta text-sm mt-2"
@@ -481,7 +546,7 @@ export default function OnboardingPage() {
                   disabled={loading}
                   className="w-full py-4 bg-white text-black font-jakarta font-medium rounded-xl hover:bg-white/90 transition-all disabled:opacity-50"
                 >
-                  {loading ? "Saving..." : "Complete Setup"}
+                  {loading ? "Saving..." : isEditMode ? "Update Setup" : "Complete Setup"}
                 </button>
                 
                 <button

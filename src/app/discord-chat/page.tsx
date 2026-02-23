@@ -157,6 +157,14 @@ export default function DiscordChatPage() {
                 {instructions ||
                   "Once linked, message the bot in DM, mention it in your server, or enable all-message mode on the backend if configured."}
               </p>
+
+              <button
+                type="button"
+                onClick={() => router.push("/onboarding?edit=1")}
+                className="mt-3 font-jakarta text-xs text-white/60 hover:text-white transition-colors"
+              >
+                Edit setup
+              </button>
             </div>
           </div>
         </div>

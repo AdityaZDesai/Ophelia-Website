@@ -46,11 +46,34 @@ export async function POST(request: Request) {
       selectedAudio,
     } = body;
     const normalizedPhone = typeof phone === "string" ? phone.replace(/\s+/g, "") : phone;
-    const authCode =
-      communicationChannel === "telegram"
-        ? Math.floor(100000 + Math.random() * 900000).toString()
-        : null;
-    const verified = ["telegram", "discord"].includes(communicationChannel) ? false : null;
+
+    const existingUserQuery = `
+      SELECT
+        "communicationChannel",
+        "auth_code",
+        "verified"
+      FROM "user"
+      WHERE "id" = $1
+      LIMIT 1
+    `;
+    const existingUserResult = await pool.query(existingUserQuery, [session.user.id]);
+
+    if (existingUserResult.rows.length === 0) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const existingUser = existingUserResult.rows[0] as {
+      communicationChannel: string | null;
+      auth_code: string | null;
+      verified: boolean | null;
+    };
+    const isChannelChanged = existingUser.communicationChannel !== communicationChannel;
+
+    let authCode: string | null = null;
+    let verified: boolean | null = null;
     let discordVerificationUrl: string | null = null;
     let discordVerificationToken: string | null = null;
     let discordInstructions: string | null = null;
@@ -88,7 +111,11 @@ export async function POST(request: Request) {
       );
     }
 
-    if (communicationChannel === "discord") {
+    const needsDiscordRelink =
+      communicationChannel === "discord" &&
+      (isChannelChanged || !existingUser.auth_code || existingUser.verified === false);
+
+    if (needsDiscordRelink) {
       const discordPayload = {
         name: session.user.name || "User",
         email: session.user.email,
@@ -131,6 +158,9 @@ export async function POST(request: Request) {
           : null;
       discordInstructions =
         typeof discordData?.instructions === "string" ? discordData.instructions : null;
+
+      authCode = discordVerificationToken;
+      verified = false;
     }
 
     // Validate phone if channel requires it
@@ -139,6 +169,25 @@ export async function POST(request: Request) {
         { error: "Phone number is required for this channel" },
         { status: 400 }
       );
+    }
+
+    if (communicationChannel === "telegram") {
+      if (isChannelChanged) {
+        authCode = Math.floor(100000 + Math.random() * 900000).toString();
+        verified = false;
+      } else {
+        authCode =
+          existingUser.auth_code || Math.floor(100000 + Math.random() * 900000).toString();
+        verified = existingUser.verified ?? false;
+      }
+    } else if (communicationChannel === "discord") {
+      if (!authCode) {
+        authCode = existingUser.auth_code;
+      }
+
+      if (verified === null) {
+        verified = existingUser.verified ?? false;
+      }
     }
 
     // Update user in database
@@ -165,7 +214,7 @@ export async function POST(request: Request) {
       selectedPhoto,
       selectedAudio,
       session.user.id,
-      communicationChannel === "discord" ? discordVerificationToken : authCode,
+      authCode,
       verified,
     ]);
 

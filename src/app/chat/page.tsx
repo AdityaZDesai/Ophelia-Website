@@ -462,8 +462,15 @@ export default function ChatPage() {
                 </p>
               </div>
             </div>
-            <div>
+            <div className="text-right">
               <h1 className="font-cormorant text-2xl text-white">harmonica</h1>
+              <button
+                type="button"
+                onClick={() => router.push("/onboarding?edit=1")}
+                className="mt-1 font-jakarta text-xs text-white/60 hover:text-white transition-colors"
+              >
+                Edit setup
+              </button>
             </div>
           </div>
         </div>

@@ -98,6 +98,16 @@ export default function TelegramChatPage() {
               <p className="mt-3 font-jakarta text-[11px] text-white/50">
                 Bot: @{TELEGRAM_BOT_USERNAME}
               </p>
+
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/onboarding?edit=1")}
+                  className="font-jakarta text-xs text-white/60 hover:text-white transition-colors"
+                >
+                  Edit setup
+                </button>
+              </div>
             </div>
           </div>
         </div>

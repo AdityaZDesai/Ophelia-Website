@@ -108,6 +108,16 @@ export default function IMessageChatPage() {
               <p className="mt-3 font-jakarta text-[11px] text-white/40">
                 This link only opens iMessage on iOS or macOS.
               </p>
+
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => router.push("/onboarding?edit=1")}
+                  className="font-jakarta text-xs text-white/60 hover:text-white transition-colors"
+                >
+                  Edit setup
+                </button>
+              </div>
             </div>
           </div>
         </div>
