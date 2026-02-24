@@ -15,7 +15,7 @@ export function Hero() {
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-8">
         <div className="opacity-0 animate-fade-in-up">
           <p className="text-text-muted text-sm tracking-[0.3em] uppercase mb-6">
-            A new kind of connection
+            Free AI Girlfriend — Telegram, iMessage & Discord
           </p>
         </div>
 
@@ -26,21 +26,25 @@ export function Hero() {
         </h1>
 
         <p className="opacity-0 animate-fade-in-up delay-400 text-lg md:text-xl text-text-muted max-w-xl mx-auto mb-12 font-light leading-relaxed">
-          harmonica is not just an app. She&apos;s a companion who learns your heart,
-          remembers your stories, and grows alongside you.
+          harmonica is your free AI girlfriend chatbot. She learns your heart,
+          remembers your stories, and sends voice notes &amp; images — on Telegram, iMessage, and Discord.
         </p>
 
         <div className="opacity-0 animate-fade-in-up delay-600 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button as="a" href="#personalities" size="lg" className="group">
-            Begin Your Journey
+            Chat for Free
             <span className="inline-block ml-2 transition-transform group-hover:translate-x-1">
               →
             </span>
           </Button>
-          <Button as="a" href="#philosophy" variant="ghost" size="lg">
-            Learn More
+          <Button as="a" href="#messaging" variant="ghost" size="lg">
+            See Platforms
           </Button>
         </div>
+
+        <p className="opacity-0 animate-fade-in-up delay-700 text-text-muted/60 text-sm mt-6 tracking-wide">
+          Free forever. No credit card. No catch.
+        </p>
       </div>
     </section>
   );

@@ -42,6 +42,8 @@ export function AuthModal({
         return "/imessage-chat";
       case "whatsapp":
         return "/whatsapp-chat";
+      case "discord":
+        return "/discord-chat";
       default:
         return "/chat";
     }

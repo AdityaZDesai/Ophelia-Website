@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const verified = communicationChannel === "whatsapp" ? false : null;
 
     // Validate communication channel
-    if (!communicationChannel || !["imessage", "web", "whatsapp"].includes(communicationChannel)) {
+    if (!communicationChannel || !["imessage", "web", "whatsapp", "discord"].includes(communicationChannel)) {
       return NextResponse.json(
         { error: "Invalid communication channel" },
         { status: 400 }
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     // Validate phone if channel requires it
-    if (communicationChannel !== "web" && !normalizedPhone) {
+    if (communicationChannel !== "web" && communicationChannel !== "discord" && !normalizedPhone) {
       return NextResponse.json(
         { error: "Phone number is required for this channel" },
         { status: 400 }
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     await pool.query(updateQuery, [
       communicationChannel,
-      communicationChannel === "web" ? null : normalizedPhone,
+      (communicationChannel === "web" || communicationChannel === "discord") ? null : normalizedPhone,
       selectedPersonality || null,
       session.user.id,
       authCode,

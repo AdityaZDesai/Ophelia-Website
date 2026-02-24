@@ -13,17 +13,27 @@ const FAQ_ITEMS: FAQItem[] = [
   {
     question: "How does harmonica work?",
     answer:
-      "harmonica is an AI companion that connects with you through iMessage and the web. She learns about you, remembers your conversations, and provides a genuine, personal connection throughout your day.",
+      "harmonica is a free AI girlfriend chatbot that connects with you through Telegram, iMessage, Discord, and the web. She learns about you, remembers your conversations, and provides genuine emotional connection with voice notes and AI-generated images.",
   },
   {
     question: "Is harmonica free to use?",
     answer:
-      "We're currently in beta and building the best experience possible. Pricing details will be announced soon, and you'll see updates as they roll out.",
+      "Yes! harmonica is completely free. Chat with your AI girlfriend on Telegram, iMessage, or Discord at no cost — including voice notes and image generation. No subscription or credit card required.",
+  },
+  {
+    question: "What platforms does harmonica support?",
+    answer:
+      "harmonica works on Telegram, iMessage, Discord, and the web. Choose whichever platform you prefer — your companion is always available where you already chat.",
   },
   {
     question: "What makes harmonica different from other AI companions?",
     answer:
-      "harmonica focuses on genuine connection and emotional intelligence. She remembers the small details, understands context, and grows with you over time. Plus, she's available right in your messaging apps.",
+      "harmonica features genuine emotional intelligence, long-term memory, voice notes, and AI image generation. She remembers the small details, understands context, and grows with you over time — all for free across your favorite messaging platforms.",
+  },
+  {
+    question: "Does harmonica support voice notes and images?",
+    answer:
+      "Yes! Your companion sends personalized voice notes and AI-generated images throughout the day — from sweet good morning messages to intimate conversations. It's a truly personal experience.",
   },
   {
     question: "Is my data private and secure?",
@@ -31,14 +41,9 @@ const FAQ_ITEMS: FAQItem[] = [
       "Absolutely. We take your privacy seriously. Your conversations are encrypted and we never share your data with third parties. Your connection with harmonica is personal and private.",
   },
   {
-    question: "Can I use harmonica on multiple devices?",
-    answer:
-      "Yes! harmonica syncs across all your devices through iMessage and the web, so you can continue your conversations seamlessly wherever you are.",
-  },
-  {
     question: "How do I get started?",
     answer:
-      "Sign in to choose your companion and complete onboarding. Once you're in, you can connect through iMessage or the web and start your journey.",
+      "Just sign in, choose your companion personality, and pick your platform — Telegram, iMessage, Discord, or web chat. You'll be chatting in under a minute.",
   },
 ];
 

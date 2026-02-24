@@ -38,7 +38,10 @@ export default function OnboardingPage() {
   const personalityData = PERSONALITIES.find((p) => p.id === selectedPersonality);
 
   const requiresPhone = selectedChannel === "imessage" || selectedChannel === "whatsapp";
-  const selectedChannelLabel = selectedChannel === "whatsapp" ? "WhatsApp" : "iMessage";
+  const selectedChannelLabel = 
+    selectedChannel === "whatsapp" ? "WhatsApp" : 
+    selectedChannel === "imessage" ? "iMessage" : 
+    "Discord";
 
   const handleChannelSelect = (channel: CommunicationChannel) => {
     setSelectedChannel(channel);
@@ -107,6 +110,8 @@ export default function OnboardingPage() {
          router.push("/imessage-chat");
        } else if (selectedChannel === "whatsapp") {
          router.push("/whatsapp-chat");
+       } else if (selectedChannel === "discord") {
+         router.push("/discord-chat");
        } else {
          router.push("/chat");
        }
