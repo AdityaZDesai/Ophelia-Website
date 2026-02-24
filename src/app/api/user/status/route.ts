@@ -32,7 +32,9 @@ export async function GET() {
       SELECT 
         "onboardingCompleted",
         "selectedPersonality",
-        "communicationChannel"
+        "communicationChannel",
+        "selectedPhoto",
+        "selectedAudio"
       FROM "user"
       WHERE "id" = $1
     `;
@@ -52,13 +54,17 @@ export async function GET() {
     console.log(`[UserStatusAPI] User data retrieved:`, {
       onboardingCompleted: user.onboardingCompleted,
       selectedPersonality: user.selectedPersonality,
-      communicationChannel: user.communicationChannel
+      communicationChannel: user.communicationChannel,
+      selectedPhoto: user.selectedPhoto,
+      selectedAudio: user.selectedAudio,
     });
 
     const response = {
       onboardingCompleted: user.onboardingCompleted || false,
       selectedPersonality: user.selectedPersonality,
       communicationChannel: user.communicationChannel,
+      selectedPhoto: user.selectedPhoto,
+      selectedAudio: user.selectedAudio,
     };
 
     console.log(`[UserStatusAPI] Returning status:`, response);
@@ -71,4 +77,3 @@ export async function GET() {
     );
   }
 }
-

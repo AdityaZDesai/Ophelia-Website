@@ -85,7 +85,7 @@ export default function IMessageChatPage() {
 
               <div className="mt-5">
                 <a
-                  href="imessage://ophelia@a.imsg.co&body=Hello"
+                  href="imessage://harmonica@a.imsg.co&body=Hello"
                   className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white text-black font-jakarta font-medium text-xs sm:text-sm hover:bg-white/90 transition-all duration-300 shadow-lg shadow-white/10"
                 >
                   Open iMessage

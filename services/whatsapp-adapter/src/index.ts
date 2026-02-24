@@ -1,5 +1,6 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import express, { type Request, type Response } from "express";
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import pino from "pino";
@@ -14,6 +15,19 @@ import {
   type WASocket,
   type proto,
 } from "@whiskeysockets/baileys";
+
+const envPaths = [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), ".env.local"),
+  path.resolve(process.cwd(), "..", "..", ".env"),
+  path.resolve(process.cwd(), "..", "..", ".env.local"),
+];
+
+for (const envPath of envPaths) {
+  if (fsSync.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+  }
+}
 
 const log = pino({ level: process.env.LOG_LEVEL || "info" });
 

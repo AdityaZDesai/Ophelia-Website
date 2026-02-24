@@ -25,6 +25,8 @@ function AuthRedirect() {
         return "/whatsapp-chat";
       case "discord":
         return "/discord-chat";
+      case "telegram":
+        return "/telegram-chat";
       default:
         return "/chat";
     }

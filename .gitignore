@@ -48,3 +48,4 @@ opencode.json
 *.png
 /data
 services/whatsapp-adapter/data/
+*.mp3

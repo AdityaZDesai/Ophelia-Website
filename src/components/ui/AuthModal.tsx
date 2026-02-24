@@ -44,6 +44,8 @@ export function AuthModal({
         return "/whatsapp-chat";
       case "discord":
         return "/discord-chat";
+      case "telegram":
+        return "/telegram-chat";
       default:
         return "/chat";
     }
@@ -80,11 +82,7 @@ export function AuthModal({
           return;
         }
 
-        console.log(`[AuthModal] Sign up successful, storing personality:`, selectedPersonality?.id);
-        // Store selected personality in session storage for onboarding
-        if (selectedPersonality) {
-          sessionStorage.setItem("selectedPersonality", selectedPersonality.id);
-        }
+        console.log(`[AuthModal] Sign up successful`);
 
         console.log(`[AuthModal] Redirecting new user to /onboarding`);
         onSuccess();
@@ -177,11 +175,6 @@ export function AuthModal({
     // #endregion
     
     try {
-      if (selectedPersonality) {
-        console.log(`[AuthModal] Storing selected personality in sessionStorage:`, selectedPersonality.id);
-        sessionStorage.setItem("selectedPersonality", selectedPersonality.id);
-      }
-      
       console.log(`[AuthModal] Calling signIn.social for provider: ${provider}`);
       // #region agent log
       fetch('http://127.0.0.1:7242/ingest/83f7ebfb-fb98-414f-a762-f20f439aa009',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthModal.tsx:handleSocialSignIn:before-signIn',message:'About to call signIn.social',data:{provider},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{});
