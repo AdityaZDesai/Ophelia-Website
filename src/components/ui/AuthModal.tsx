@@ -46,6 +46,8 @@ export function AuthModal({
         return "/discord-chat";
       case "telegram":
         return "/telegram-chat";
+      case "discord":
+        return "/discord-chat";
       default:
         return "/chat";
     }

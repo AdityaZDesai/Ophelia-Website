@@ -45,7 +45,6 @@ next-env.d.ts
 opencode.json
 
 /auth
-*.png
+
 /data
 services/whatsapp-adapter/data/
-*.mp3

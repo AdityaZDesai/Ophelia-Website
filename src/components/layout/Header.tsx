@@ -1,13 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AuthModal, Button } from "@/components/ui";
 import { NAV_LINKS } from "@/lib/constants";
+import { signOut, useSession } from "@/lib/auth-client";
 
 export function Header() {
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [accountRedirectPath, setAccountRedirectPath] = useState("/chat");
+  const [loggingOut, setLoggingOut] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+
+  const getRedirectForChannel = (channel?: string | null) => {
+    switch (channel) {
+      case "imessage":
+        return "/imessage-chat";
+      case "whatsapp":
+        return "/whatsapp-chat";
+      case "telegram":
+        return "/telegram-chat";
+      case "discord":
+        return "/discord-chat";
+      default:
+        return "/chat";
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +40,46 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!session) {
+      setShowAccountMenu(false);
+      return;
+    }
+
+    const loadUserStatus = async () => {
+      try {
+        const response = await fetch("/api/user/status", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const status = await response.json();
+        setAccountRedirectPath(getRedirectForChannel(status?.communicationChannel));
+      } catch {
+        setAccountRedirectPath("/chat");
+      }
+    };
+
+    loadUserStatus();
+  }, [session]);
+
+  useEffect(() => {
+    if (!showAccountMenu) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setShowAccountMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showAccountMenu]);
+
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   const handleSignInClick = () => {
@@ -24,9 +87,37 @@ export function Header() {
     closeMobileMenu();
   };
 
+  const handleAccountButtonClick = () => {
+    setShowAccountMenu((prev) => !prev);
+    closeMobileMenu();
+  };
+
+  const handleAccountMenuNavigate = (path: string) => {
+    setShowAccountMenu(false);
+    closeMobileMenu();
+    router.push(path);
+  };
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+
+    try {
+      setLoggingOut(true);
+      await signOut();
+      setShowAccountMenu(false);
+      closeMobileMenu();
+      router.push("/");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
   };
+
+  const isAuthenticated = !!session;
+  const accountLabel = isPending ? "Loading..." : isAuthenticated ? "Your Account" : "Sign In";
 
   return (
     <>
@@ -57,10 +148,41 @@ export function Header() {
           </div>
 
           {/* CTA and Mobile Menu Button */}
-          <div className="flex items-center gap-4">
-            <Button onClick={handleSignInClick} className="hidden sm:block">
-              Sign In
+          <div className="flex items-center gap-4 relative" ref={accountMenuRef}>
+            <Button
+              onClick={isAuthenticated ? handleAccountButtonClick : handleSignInClick}
+              className="hidden sm:block"
+              disabled={isPending}
+            >
+              {accountLabel}
             </Button>
+
+            {isAuthenticated && showAccountMenu && (
+              <div className="hidden sm:flex absolute right-0 top-[calc(100%+0.6rem)] w-56 flex-col gap-2 rounded-2xl border border-cream bg-background/95 p-3 shadow-xl backdrop-blur-md">
+                <button
+                  type="button"
+                  onClick={() => handleAccountMenuNavigate(accountRedirectPath)}
+                  className="w-full rounded-xl bg-foreground px-4 py-2.5 text-left text-sm font-medium text-background hover:bg-foreground/90 transition-colors"
+                >
+                  Go to your app
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAccountMenuNavigate("/onboarding?edit=1")}
+                  className="w-full rounded-xl border border-cream px-4 py-2.5 text-left text-sm text-foreground hover:bg-cream/40 transition-colors"
+                >
+                  Edit setup
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="w-full rounded-xl border border-red-400/50 px-4 py-2.5 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-60"
+                >
+                  {loggingOut ? "Logging out..." : "Logout"}
+                </button>
+              </div>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -113,12 +235,36 @@ export function Header() {
                 {link.label}
               </a>
             ))}
-            <button
-              onClick={handleSignInClick}
-              className="text-center text-sm font-medium px-6 py-3 bg-foreground text-background rounded-full mt-2"
-            >
-              Sign In
-            </button>
+            {isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => handleAccountMenuNavigate(accountRedirectPath)}
+                  className="text-center text-sm font-medium px-6 py-3 bg-foreground text-background rounded-full mt-2"
+                >
+                  Go to your app
+                </button>
+                <button
+                  onClick={() => handleAccountMenuNavigate("/onboarding?edit=1")}
+                  className="text-center text-sm font-medium px-6 py-3 border border-cream text-foreground rounded-full"
+                >
+                  Edit setup
+                </button>
+                <button
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="text-center text-sm font-medium px-6 py-3 border border-red-400/50 text-red-400 rounded-full disabled:opacity-60"
+                >
+                  {loggingOut ? "Logging out..." : "Logout"}
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleSignInClick}
+                className="text-center text-sm font-medium px-6 py-3 bg-foreground text-background rounded-full mt-2"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </header>

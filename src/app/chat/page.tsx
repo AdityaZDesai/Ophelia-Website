@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -8,16 +8,179 @@ import {
   getSession,
   listSessions,
   sendMessage,
+  updateSession,
   type ChatSession,
   type MessageResponse,
 } from "@/lib/chat0-client";
-import { PERSONALITIES } from "@/lib/constants";
-import type { PersonalityId } from "@/types";
+import { AUDIO_OPTIONS, GIRL_PHOTOS, PERSONALITIES } from "@/lib/constants";
+import type { AudioOptionId, GirlPhotoId, PersonalityId } from "@/types";
 
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   images?: string[];
+  audioUrls?: string[];
+  voiceNoteUrl?: string;
+}
+
+interface CachedChatState {
+  sessionId: string;
+  updatedAt: string;
+  messages: ChatMessage[];
+}
+
+interface SessionUser {
+  id?: string;
+  selectedPersonality?: PersonalityId | null;
+}
+
+interface UserSelections {
+  selectedPersonality: PersonalityId | null;
+  selectedPhoto: GirlPhotoId | null;
+  selectedAudio: AudioOptionId | null;
+}
+
+interface UserStatusResponse {
+  selectedPersonality?: string | null;
+  selectedPhoto?: string | null;
+  selectedAudio?: string | null;
+}
+
+const AUDIO_URL_PATTERN = /\.(mp3|wav|m4a|ogg|webm)(\?|$)/i;
+const PERSONALITY_IDS = new Set(PERSONALITIES.map((personality) => personality.id));
+const PHOTO_IDS = new Set(GIRL_PHOTOS.map((photo) => photo.id));
+const AUDIO_IDS = new Set(AUDIO_OPTIONS.map((audio) => audio.id));
+
+function getCacheKey(userId: string): string {
+  return `chat0-cache:${userId}`;
+}
+
+function readChatCache(userId: string): CachedChatState | null {
+  try {
+    const raw = localStorage.getItem(getCacheKey(userId));
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as CachedChatState;
+    if (!parsed || typeof parsed !== "object") return null;
+    if (!parsed.sessionId || !Array.isArray(parsed.messages) || !parsed.updatedAt) return null;
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeChatCache(userId: string, data: CachedChatState): void {
+  try {
+    localStorage.setItem(getCacheKey(userId), JSON.stringify(data));
+  } catch {
+    // Ignore localStorage write errors (private mode, quota exceeded)
+  }
+}
+
+function toPersonalityId(value: string | null | undefined): PersonalityId | null {
+  if (!value || !PERSONALITY_IDS.has(value as PersonalityId)) return null;
+  return value as PersonalityId;
+}
+
+function toPhotoId(value: string | null | undefined): GirlPhotoId | null {
+  if (!value || !PHOTO_IDS.has(value as GirlPhotoId)) return null;
+  return value as GirlPhotoId;
+}
+
+function toAudioId(value: string | null | undefined): AudioOptionId | null {
+  if (!value || !AUDIO_IDS.has(value as AudioOptionId)) return null;
+  return value as AudioOptionId;
+}
+
+function normalizeVoiceNoteUrl(
+  voiceNote?: MessageResponse["voice_note"]
+): string | undefined {
+  const url =
+    typeof voiceNote === "string"
+      ? voiceNote
+      : voiceNote && typeof voiceNote === "object" && typeof voiceNote.url === "string"
+      ? voiceNote.url
+      : undefined;
+
+  if (!url) return undefined;
+  if (url.startsWith("data:audio/")) return url;
+  if (AUDIO_URL_PATTERN.test(url)) return url;
+  return undefined;
+}
+
+function normalizeAudioUrls(data: {
+  audio?: MessageResponse["audio"];
+  voice_note?: MessageResponse["voice_note"];
+  attachments?: MessageResponse["attachments"];
+}): string[] | undefined {
+  const directAudio =
+    data.audio && typeof data.audio === "object" && typeof data.audio.url === "string"
+      ? data.audio.url
+      : undefined;
+
+  const voiceNoteUrl = normalizeVoiceNoteUrl(data.voice_note);
+
+  const attachmentAudio =
+    data.attachments?.filter(
+      (attachment): attachment is string =>
+        typeof attachment === "string" &&
+        (attachment.startsWith("data:audio/") || AUDIO_URL_PATTERN.test(attachment))
+    ) || [];
+
+  const allAudio = [directAudio, voiceNoteUrl, ...attachmentAudio].filter(
+    (url): url is string => typeof url === "string" && url.length > 0
+  );
+  const uniqueAudio = Array.from(new Set(allAudio));
+
+  return uniqueAudio.length > 0 ? uniqueAudio : undefined;
+}
+
+function normalizeImages(data: {
+  image?: MessageResponse["image"];
+  images?: MessageResponse["images"];
+  attachments?: MessageResponse["attachments"];
+}): string[] | undefined {
+  const imageUrl =
+    typeof data.image === "string"
+      ? data.image
+      : data.image && typeof data.image === "object"
+      ? data.image.url
+      : undefined;
+
+  const images = data.images?.filter((img) => typeof img === "string") || [];
+  const attachments =
+    data.attachments?.filter(
+      (attachment): attachment is string =>
+        typeof attachment === "string" &&
+        !attachment.startsWith("data:audio/") &&
+        !AUDIO_URL_PATTERN.test(attachment)
+    ) || [];
+
+  const allImages = [imageUrl, ...images, ...attachments].filter(
+    (img): img is string => typeof img === "string" && img.length > 0
+  );
+  const uniqueImages = Array.from(new Set(allImages));
+
+  return uniqueImages.length > 0 ? uniqueImages : undefined;
+}
+
+function formatHistory(history: ChatSession["history"]): ChatMessage[] {
+  return history.map((msg: ChatSession["history"][number]) => ({
+    role: msg.role as "user" | "assistant",
+    content: msg.content,
+    images: normalizeImages({
+      image: msg.image,
+      images: msg.images,
+      attachments: msg.attachments,
+    }),
+    audioUrls: normalizeAudioUrls({
+      audio: msg.audio,
+      voice_note: msg.voice_note,
+      attachments: msg.attachments,
+    }),
+    voiceNoteUrl: normalizeVoiceNoteUrl(msg.voice_note),
+  }));
 }
 
 export default function ChatPage() {
@@ -28,8 +191,11 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initializing, setInitializing] = useState(true);
+  const [userSelections, setUserSelections] = useState<UserSelections | null>(null);
+  const [failedVoiceNotes, setFailedVoiceNotes] = useState<Record<string, boolean>>({});
 
   // Map personality ID to API persona
   const getPersonaFromPersonality = (personalityId: PersonalityId | null): string => {
@@ -45,60 +211,125 @@ export default function ChatPage() {
   };
 
   // Get personality data
-  const personalityId = (session?.user as any)?.selectedPersonality as PersonalityId | null;
+  const sessionUser = session?.user as SessionUser | undefined;
+  const personalityId = userSelections?.selectedPersonality ?? sessionUser?.selectedPersonality ?? null;
   const personality = personalityId
     ? PERSONALITIES.find((p) => p.id === personalityId)
     : PERSONALITIES[0]; // Default to first personality
+  const selectedPhotoId = userSelections?.selectedPhoto ?? null;
+  const selectedPhoto = selectedPhotoId
+    ? GIRL_PHOTOS.find((photo) => photo.id === selectedPhotoId)
+    : null;
+  const selectedAudioId = userSelections?.selectedAudio ?? null;
+  const selectedAudio = selectedAudioId
+    ? AUDIO_OPTIONS.find((audio) => audio.id === selectedAudioId)
+    : null;
 
   // Initialize session on mount
   useEffect(() => {
     if (isPending || !session) return;
+    const currentSession = session;
 
     async function initializeSession() {
       try {
         setInitializing(true);
         setError(null);
+        const userId = (currentSession.user as SessionUser | undefined)?.id;
+        const cached = userId ? readChatCache(userId) : null;
+        let resolvedPersonalityId = toPersonalityId(
+          (currentSession.user as SessionUser | undefined)?.selectedPersonality ?? null
+        );
+
+        try {
+          const statusResponse = await fetch("/api/user/status", {
+            method: "GET",
+            cache: "no-store",
+          });
+
+          if (statusResponse.ok) {
+            const status = (await statusResponse.json()) as UserStatusResponse;
+            const nextSelections: UserSelections = {
+              selectedPersonality: toPersonalityId(status.selectedPersonality),
+              selectedPhoto: toPhotoId(status.selectedPhoto),
+              selectedAudio: toAudioId(status.selectedAudio),
+            };
+
+            resolvedPersonalityId = nextSelections.selectedPersonality ?? resolvedPersonalityId;
+            setUserSelections(nextSelections);
+          }
+        } catch (statusError) {
+          console.error("Failed to fetch user selections:", statusError);
+        }
+
+        if (cached?.messages.length) {
+          setMessages(cached.messages);
+        }
 
         // Try to get existing sessions first
-        let session: ChatSession;
-        try {
-          const existingSessions = await listSessions();
-          if (existingSessions.length > 0) {
-            // Load the most recent session
-            session = await getSession(existingSessions[0].session_id);
-          } else {
-            // Create a new session with user's personality
-            const persona = getPersonaFromPersonality(personalityId);
-            session = await createSession({
-              name: "babe",
-              persona: persona,
-              audio_enabled: false,
-            });
+        let activeSession: ChatSession | null = null;
+
+        if (cached?.sessionId) {
+          try {
+            activeSession = await getSession(cached.sessionId);
+          } catch {
+            activeSession = null;
           }
-        } catch (listError) {
+        }
+
+        try {
+          if (!activeSession) {
+            const existingSessions = await listSessions();
+            if (existingSessions.length > 0) {
+              // Load the most recent session
+              activeSession = await getSession(existingSessions[0].session_id);
+            } else {
+              // Create a new session with user's personality
+              const persona = getPersonaFromPersonality(resolvedPersonalityId);
+              activeSession = await createSession({
+                name: "babe",
+                persona: persona,
+                audio_enabled: true,
+              });
+            }
+          }
+        } catch {
           // If listing fails, try creating a new session
-          const persona = getPersonaFromPersonality(personalityId);
-          session = await createSession({
+          const persona = getPersonaFromPersonality(resolvedPersonalityId);
+          activeSession = await createSession({
             name: "babe",
             persona: persona,
-            audio_enabled: false,
+            audio_enabled: true,
           });
         }
 
-        setChatSession(session);
+        if (!activeSession) {
+          throw new Error("Could not initialize chat session");
+        }
+
+        if (!activeSession.audio_enabled) {
+          activeSession = await updateSession(activeSession.session_id, { audio_enabled: true });
+        }
+
+        setChatSession(activeSession);
 
         // Load conversation history
-        if (session.history && session.history.length > 0) {
-          const formattedMessages: ChatMessage[] = session.history.map((msg: any) => ({
-            role: msg.role as "user" | "assistant",
-            content: msg.content,
-            images: normalizeImages({
-              image: msg.image,
-              images: msg.images,
-              attachments: msg.attachments,
-            }),
-          }));
+        if (activeSession.history && activeSession.history.length > 0) {
+          const formattedMessages = formatHistory(activeSession.history);
           setMessages(formattedMessages);
+
+          if (userId) {
+            writeChatCache(userId, {
+              sessionId: activeSession.session_id,
+              updatedAt: activeSession.updated_at,
+              messages: formattedMessages,
+            });
+          }
+        } else if (userId) {
+          writeChatCache(userId, {
+            sessionId: activeSession.session_id,
+            updatedAt: activeSession.updated_at,
+            messages: [],
+          });
         }
       } catch (err) {
         console.error("Failed to initialize session:", err);
@@ -109,7 +340,7 @@ export default function ChatPage() {
     }
 
     initializeSession();
-  }, [session, isPending, personalityId]);
+  }, [session, isPending]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -122,30 +353,6 @@ export default function ChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const normalizeImages = (data: {
-    image?: MessageResponse["image"];
-    images?: MessageResponse["images"];
-    attachments?: MessageResponse["attachments"];
-  }): string[] | undefined => {
-    const imageUrl =
-      typeof data.image === "string"
-        ? data.image
-        : data.image && typeof data.image === "object"
-        ? data.image.url
-        : undefined;
-
-    const images = data.images?.filter((img) => typeof img === "string") || [];
-    const attachments =
-      data.attachments?.filter((attachment) => typeof attachment === "string") || [];
-
-    const allImages = [imageUrl, ...images, ...attachments].filter(
-      (img): img is string => typeof img === "string" && img.length > 0
-    );
-    const uniqueImages = Array.from(new Set(allImages));
-
-    return uniqueImages.length > 0 ? uniqueImages : undefined;
-  };
 
   const handleSend = async () => {
     if (!input.trim() || !chatSession || loading) return;
@@ -174,8 +381,23 @@ export default function ChatPage() {
         role: "assistant",
         content: response.reply,
         images: normalizeImages(response),
+        audioUrls: normalizeAudioUrls(response),
+        voiceNoteUrl: normalizeVoiceNoteUrl(response.voice_note),
       };
-      setMessages((prev) => [...prev, assistantMsg]);
+      let nextMessages: ChatMessage[] = [];
+      setMessages((prev) => {
+        nextMessages = [...prev, assistantMsg];
+        return nextMessages;
+      });
+
+      const userId = (session?.user as SessionUser | undefined)?.id;
+      if (userId) {
+        writeChatCache(userId, {
+          sessionId: chatSession.session_id,
+          updatedAt: new Date().toISOString(),
+          messages: nextMessages,
+        });
+      }
     } catch (err) {
       console.error("Failed to send message:", err);
       setError(err instanceof Error ? err.message : "Failed to send message. Please try again.");
@@ -193,7 +415,22 @@ export default function ChatPage() {
     }
   };
 
-  if (isPending || initializing) {
+  const handleLogout = async () => {
+    if (loggingOut) return;
+
+    try {
+      setLoggingOut(true);
+      await signOut();
+      router.push("/");
+    } catch (error) {
+      console.error("Failed to sign out:", error);
+      setError("Failed to log out. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  if (isPending || (initializing && messages.length === 0)) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="animate-pulse text-white/50 font-jakarta">Loading...</div>
@@ -220,10 +457,10 @@ export default function ChatPage() {
                     : "linear-gradient(135deg, #f59e0b40, #f59e0b20)",
                 }}
               >
-                {personality ? (
+                {selectedPhoto || personality ? (
                   <img
-                    src={personality.image}
-                    alt={personality.name}
+                    src={selectedPhoto?.image || personality?.image}
+                    alt={selectedPhoto?.name || personality?.name || "Profile"}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -233,12 +470,40 @@ export default function ChatPage() {
               <div>
                 <p className="font-cormorant text-xl text-white">{personality?.name || "Serena"}</p>
                 <p className="font-jakarta text-xs text-white/50">
-                  {chatSession ? "Online" : "Connecting..."}
+                  {chatSession
+                    ? selectedAudio
+                      ? `Online · ${selectedAudio.name} voice`
+                      : "Online"
+                    : "Connecting..."}
                 </p>
               </div>
             </div>
-            <div>
+            <div className="text-right">
               <h1 className="font-cormorant text-2xl text-white">harmonica</h1>
+              <div className="mt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push("/")}
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-white/25 text-white font-jakarta text-sm font-medium hover:bg-white/10 transition-all"
+                >
+                  Back to Website
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/onboarding?edit=1")}
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white text-black font-jakarta text-sm font-semibold hover:bg-white/90 transition-all shadow-md shadow-white/10"
+                >
+                  Edit Setup
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl border border-red-400/50 text-red-300 font-jakarta text-sm font-medium hover:bg-red-500/10 hover:text-red-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loggingOut ? "Logging out..." : "Logout"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -268,53 +533,107 @@ export default function ChatPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
+              {messages.map((msg, idx) => {
+                const hasAssistantVoiceNote = msg.role === "assistant" && !!msg.voiceNoteUrl;
+                const extraAudioUrls =
+                  msg.audioUrls?.filter((url) => url !== msg.voiceNoteUrl) || [];
+                const voiceNoteKey = msg.voiceNoteUrl ? `${idx}:${msg.voiceNoteUrl}` : undefined;
+                const voiceNoteFailed = voiceNoteKey ? !!failedVoiceNotes[voiceNoteKey] : false;
+                const bubbleWidthClass = hasAssistantVoiceNote
+                  ? "w-full max-w-md sm:max-w-lg"
+                  : "max-w-[88%] sm:max-w-[80%]";
+
+                return (
                   <div
-                    className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-4 ${
-                      msg.role === "user"
-                        ? "bg-white/10 text-white"
-                        : "bg-white/5 text-white/90 border border-white/10"
-                    }`}
-                    style={
-                      msg.role === "assistant" && personality
-                        ? {
-                            borderColor: `${personality.accentColor}30`,
-                          }
-                        : undefined
-                    }
+                    key={idx}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
-                    <p className="font-jakarta text-sm whitespace-pre-wrap">{msg.content}</p>
-                    {msg.images && msg.images.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        {msg.images.map((img, imgIdx) => (
-                          <div key={imgIdx} className="rounded-lg overflow-hidden">
-                            {typeof img === "string" &&
-                            (img.startsWith("data:image") || img.startsWith("http")) ? (
-                              <img
-                                src={img}
-                                alt={`Image ${imgIdx + 1}`}
-                                className="max-w-full h-auto"
-                                onError={(e) => {
-                                  console.error("Failed to load image:", img);
-                                  (e.target as HTMLImageElement).style.display = "none";
+                    <div
+                      className={`${bubbleWidthClass} rounded-2xl p-4 ${
+                        msg.role === "user"
+                          ? "bg-white/10 text-white"
+                          : "bg-white/5 text-white/90 border border-white/10"
+                      }`}
+                      style={
+                        msg.role === "assistant" && personality
+                          ? {
+                              borderColor: `${personality.accentColor}30`,
+                            }
+                          : undefined
+                      }
+                    >
+                      {!hasAssistantVoiceNote && (
+                        <p className="font-jakarta text-sm whitespace-pre-wrap">{msg.content}</p>
+                      )}
+                      {hasAssistantVoiceNote && msg.voiceNoteUrl && (
+                        <div className="space-y-2">
+                          <div className="min-w-[260px] rounded-lg border border-white/10 bg-black/20 p-2">
+                            {!voiceNoteFailed ? (
+                              <audio
+                                controls
+                                preload="none"
+                                className="w-full"
+                                src={msg.voiceNoteUrl}
+                                onError={() => {
+                                  if (!voiceNoteKey) return;
+                                  setFailedVoiceNotes((prev) => ({ ...prev, [voiceNoteKey]: true }));
                                 }}
                               />
                             ) : (
-                              <div className="p-4 bg-white/5 rounded text-white/50 text-xs">
-                                Image data: {img.substring(0, 50)}...
+                              <div className="space-y-2">
+                                <div className="rounded-md bg-white/5 px-3 py-2 text-xs text-white/70">
+                                  Voice note unavailable
+                                </div>
+                                <a
+                                  href={msg.voiceNoteUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-block text-xs text-white/80 underline hover:text-white"
+                                >
+                                  Open audio
+                                </a>
                               </div>
                             )}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      )}
+                      {extraAudioUrls.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          {extraAudioUrls.map((audioUrl, audioIdx) => (
+                            <div key={audioIdx} className="rounded-lg border border-white/10 bg-black/20 p-2">
+                              <audio controls preload="none" className="w-full" src={audioUrl} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {msg.images && msg.images.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          {msg.images.map((img, imgIdx) => (
+                            <div key={imgIdx} className="rounded-lg overflow-hidden">
+                              {typeof img === "string" &&
+                              (img.startsWith("data:image") || img.startsWith("http")) ? (
+                                <img
+                                  src={img}
+                                  alt={`Image ${imgIdx + 1}`}
+                                  className="max-w-full h-auto"
+                                  onError={(e) => {
+                                    console.error("Failed to load image:", img);
+                                    (e.target as HTMLImageElement).style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <div className="p-4 bg-white/5 rounded text-white/50 text-xs">
+                                  Image data: {img.substring(0, 50)}...
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-4">

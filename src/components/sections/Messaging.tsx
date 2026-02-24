@@ -56,7 +56,7 @@ export function Messaging() {
         >
           <SectionHeading
             label="Always Connected"
-            title="Talk to her anywhere"
+            title="Text her where you already chat"
             centered
           />
           <p className="text-text-muted text-base md:text-lg max-w-2xl mx-auto mt-6">

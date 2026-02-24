@@ -62,7 +62,12 @@ export interface AudioOption {
 }
 
 // Communication channel types
-export type CommunicationChannel = "imessage" | "web" | "whatsapp" | "discord" | "telegram";
+export type CommunicationChannel =
+  | "imessage"
+  | "web"
+  | "whatsapp"
+  | "telegram"
+  | "discord";
 
 export interface ChannelOption {
   id: CommunicationChannel;

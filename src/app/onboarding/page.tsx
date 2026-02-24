@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { AudioPlayer, ChannelSelector, PhoneInput } from "@/components/ui";
 import { AUDIO_OPTIONS, COMMUNICATION_CHANNELS, GIRL_PHOTOS, PERSONALITIES } from "@/lib/constants";
@@ -14,9 +14,11 @@ import type {
 
 type OnboardingStep = "photo" | "personality" | "audio" | "channel" | "phone";
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, isPending } = useSession();
+  const isEditMode = searchParams.get("edit") === "1";
   
   const [step, setStep] = useState<OnboardingStep>("photo");
   const [selectedPhoto, setSelectedPhoto] = useState<GirlPhotoId | null>(null);
@@ -26,6 +28,7 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [selectedPersonality, setSelectedPersonality] = useState<PersonalityId | null>(null);
   const [selectedAudio, setSelectedAudio] = useState<AudioOptionId | null>(null);
+  const [isLoadingExistingSelections, setIsLoadingExistingSelections] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -33,6 +36,53 @@ export default function OnboardingPage() {
       router.push("/");
     }
   }, [session, isPending, router]);
+
+  useEffect(() => {
+    if (!isEditMode || isPending || !session) return;
+
+    const loadExistingSelections = async () => {
+      try {
+        setIsLoadingExistingSelections(true);
+        const response = await fetch("/api/user/status", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const status = await response.json();
+        const validChannels: CommunicationChannel[] = ["imessage", "web", "telegram", "discord"];
+
+        if (status?.selectedPhoto) {
+          setSelectedPhoto(status.selectedPhoto as GirlPhotoId);
+        }
+
+        if (status?.selectedPersonality) {
+          setSelectedPersonality(status.selectedPersonality as PersonalityId);
+        }
+
+        if (status?.selectedAudio) {
+          setSelectedAudio(status.selectedAudio as AudioOptionId);
+        }
+
+        if (status?.communicationChannel && validChannels.includes(status.communicationChannel as CommunicationChannel)) {
+          setSelectedChannel(status.communicationChannel as CommunicationChannel);
+        }
+
+        if (typeof status?.phone === "string") {
+          setPhone(status.phone);
+        }
+      } catch (error) {
+        console.error("Failed to load existing onboarding selections:", error);
+      } finally {
+        setIsLoadingExistingSelections(false);
+      }
+    };
+
+    loadExistingSelections();
+  }, [isEditMode, isPending, session]);
 
   const personalityData = PERSONALITIES.find((p) => p.id === selectedPersonality);
 
@@ -46,6 +96,23 @@ export default function OnboardingPage() {
     ? ["photo", "personality", "audio", "channel", "phone"]
     : ["photo", "personality", "audio", "channel"];
   const currentStepIndex = flowSteps.indexOf(step);
+  const isPrimaryDisabled =
+    loading ||
+    (step === "photo" && !selectedPhoto) ||
+    (step === "personality" && !selectedPersonality) ||
+    (step === "audio" && !selectedAudio) ||
+    (step === "channel" && !selectedChannel);
+  const primaryLabel = loading
+    ? step === "phone"
+      ? "Saving..."
+      : "Please wait..."
+    : step === "phone"
+      ? isEditMode
+        ? "Update Setup"
+        : "Complete Setup"
+      : step === "channel" && selectedChannel === "web"
+        ? "Start Chatting"
+        : "Continue";
 
   const handleStepContinue = () => {
     if (step === "photo" && selectedPhoto) {
@@ -147,6 +214,20 @@ export default function OnboardingPage() {
       if (selectedChannel === "telegram" && data?.authCode) {
         sessionStorage.setItem("telegramAuthCode", data.authCode);
       }
+      if (selectedChannel === "discord") {
+        if (data?.verification_url) {
+          sessionStorage.setItem("discordVerificationUrl", data.verification_url);
+          localStorage.setItem("discordVerificationUrl", data.verification_url);
+        }
+        if (data?.verification_token) {
+          sessionStorage.setItem("discordVerificationToken", data.verification_token);
+          localStorage.setItem("discordVerificationToken", data.verification_token);
+        }
+        if (data?.instructions) {
+          sessionStorage.setItem("discordInstructions", data.instructions);
+          localStorage.setItem("discordInstructions", data.instructions);
+        }
+      }
       // Redirect based on selected channel
       if (selectedChannel === "imessage") {
         router.push("/imessage-chat");
@@ -175,14 +256,27 @@ export default function OnboardingPage() {
     );
   }
 
+  if (isLoadingExistingSelections) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="animate-pulse text-white/50 font-jakarta">Loading your setup...</div>
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6">
+    <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 pb-32 md:pb-6">
       <div className="w-full max-w-3xl">
         {/* Logo */}
         <div className="text-center mb-12">
           <h1 className="font-cormorant text-3xl md:text-4xl text-white tracking-wide">
             Ophelia
           </h1>
+          {isEditMode && (
+            <p className="font-jakarta text-white/60 text-xs mt-2 tracking-wide uppercase">
+              Edit your setup
+            </p>
+          )}
           {personalityData && (
             <p
               className="font-jakarta text-sm mt-2"
@@ -217,7 +311,7 @@ export default function OnboardingPage() {
               </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:gap-6 md:grid-cols-3">
               {GIRL_PHOTOS.map((photo) => {
                 const isSelected = selectedPhoto === photo.id;
                 return (
@@ -246,7 +340,7 @@ export default function OnboardingPage() {
               })}
             </div>
 
-            <div className="mt-10 text-center">
+            <div className="mt-10 text-center hidden md:block">
               <button
                 onClick={handleStepContinue}
                 disabled={!selectedPhoto || loading}
@@ -280,24 +374,24 @@ export default function OnboardingPage() {
                 <button
                   key={personality.id}
                   onClick={() => setSelectedPersonality(personality.id)}
-                  className={`w-full rounded-2xl border p-5 text-left transition-all duration-300 ${
+                  className={`w-full rounded-2xl border p-4 md:p-5 text-left transition-all duration-300 ${
                     selectedPersonality === personality.id
                       ? "border-white bg-white/10"
                       : "border-white/10 bg-white/5 hover:border-white/30"
                   }`}
                 >
-                  <p className="font-cormorant text-2xl text-white">{personality.name}</p>
+                  <p className="font-cormorant text-xl md:text-2xl text-white">{personality.name}</p>
                   <p className="font-jakarta text-xs uppercase tracking-[0.2em] text-white/50 mt-1">
                     {personality.tagline}
                   </p>
-                  <p className="font-jakarta text-sm text-white/70 mt-3 leading-relaxed">
+                  <p className="font-jakarta text-xs md:text-sm text-white/70 mt-3 leading-relaxed">
                     {personality.description}
                   </p>
                 </button>
               ))}
             </div>
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-10 hidden md:flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={handleBack}
                 disabled={loading}
@@ -360,7 +454,7 @@ export default function OnboardingPage() {
               })}
             </div>
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-10 hidden md:flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={handleBack}
                 disabled={loading}
@@ -402,7 +496,7 @@ export default function OnboardingPage() {
               onSelect={handleChannelSelect}
             />
 
-            <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-10 hidden md:flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={handleBack}
                 disabled={loading}
@@ -452,13 +546,13 @@ export default function OnboardingPage() {
                 error={phoneError}
               />
 
-              <div className="mt-8 flex flex-col gap-3">
+              <div className="mt-8 hidden md:flex flex-col gap-3">
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
                   className="w-full py-4 bg-white text-black font-jakarta font-medium rounded-xl hover:bg-white/90 transition-all disabled:opacity-50"
                 >
-                  {loading ? "Saving..." : "Complete Setup"}
+                  {loading ? "Saving..." : isEditMode ? "Update Setup" : "Complete Setup"}
                 </button>
                 
                 <button
@@ -472,6 +566,34 @@ export default function OnboardingPage() {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+        <div className="w-full max-w-3xl mx-auto flex items-center gap-3">
+          {step !== "photo" && (
+            <button
+              onClick={handleBack}
+              disabled={loading}
+              className="px-5 py-3 rounded-xl border border-white/20 text-white/80 font-jakarta text-sm"
+            >
+              Back
+            </button>
+          )}
+
+          <button
+            onClick={step === "phone" ? handleSubmit : handleStepContinue}
+            disabled={isPrimaryDisabled}
+            className={`
+              flex-1 py-3.5 px-5 rounded-xl font-jakarta font-medium text-sm transition-all duration-300
+              ${!isPrimaryDisabled
+                ? "bg-white text-black hover:bg-white/90"
+                : "bg-white/10 text-white/50 cursor-not-allowed"
+              }
+            `}
+          >
+            {primaryLabel}
+          </button>
+        </div>
       </div>
 
       {/* Custom Animation Styles */}
@@ -491,5 +613,19 @@ export default function OnboardingPage() {
         }
       `}</style>
     </main>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+          <div className="animate-pulse text-white/50 font-jakarta">Loading...</div>
+        </div>
+      }
+    >
+      <OnboardingContent />
+    </Suspense>
   );
 }

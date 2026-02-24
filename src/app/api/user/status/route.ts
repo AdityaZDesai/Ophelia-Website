@@ -34,7 +34,8 @@ export async function GET() {
         "selectedPersonality",
         "communicationChannel",
         "selectedPhoto",
-        "selectedAudio"
+        "selectedAudio",
+        "phone"
       FROM "user"
       WHERE "id" = $1
     `;
@@ -57,6 +58,7 @@ export async function GET() {
       communicationChannel: user.communicationChannel,
       selectedPhoto: user.selectedPhoto,
       selectedAudio: user.selectedAudio,
+      phone: user.phone,
     });
 
     const response = {
@@ -65,6 +67,7 @@ export async function GET() {
       communicationChannel: user.communicationChannel,
       selectedPhoto: user.selectedPhoto,
       selectedAudio: user.selectedAudio,
+      phone: user.phone,
     };
 
     console.log(`[UserStatusAPI] Returning status:`, response);

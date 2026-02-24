@@ -244,7 +244,7 @@ export const COMMUNICATION_CHANNELS: ChannelOption[] = [
   {
     id: "discord",
     name: "Discord",
-    description: "Chat on Discord — connect on your server",
+    description: "Connect your Discord account and chat in DMs or your server",
     icon: "discord",
     requiresPhone: false,
   },
