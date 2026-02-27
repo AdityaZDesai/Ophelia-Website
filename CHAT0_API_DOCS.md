@@ -1,4 +1,4 @@
-# Chat0 API Documentation for Next.js Integration
+ # Chat0 API Documentation for Next.js Integration
 
 ## Overview
 

@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(git push origin discord:main)",
+      "Bash(git merge origin/main)",
+      "Bash(git add src/app/api/user/onboarding/route.ts src/app/page.tsx src/components/sections/Hero.tsx src/components/sections/Messaging.tsx src/lib/constants.ts src/types/index.ts src/app/onboarding/page.tsx)",
+      "Bash(git commit:*)",
+      "Bash(npx next build)",
+      "Bash(git add src/app/layout.tsx src/app/page.tsx src/app/robots.ts src/components/layout/Footer.tsx src/components/layout/Header.tsx src/components/sections/Experience.tsx src/components/sections/FAQ.tsx src/components/sections/Hero.tsx src/components/sections/Messaging.tsx src/components/sections/Personalities.tsx src/components/sections/Stories.tsx src/components/sections/Waitlist.tsx src/lib/constants.ts)",
+      "Bash(git push origin discord)"
     ]
   }
 }
