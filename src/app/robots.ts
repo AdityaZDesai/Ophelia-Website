@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/onboarding", "/chat", "/imessage-chat", "/whatsapp-chat", "/discord-chat"],
+        disallow: ["/api/", "/onboarding", "/chat", "/imessage-chat", "/whatsapp-chat", "/discord-chat", "/telegram-chat"],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

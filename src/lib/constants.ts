@@ -11,8 +11,9 @@ import type {
 
 // Navigation links
 export const NAV_LINKS: NavLink[] = [
+  { label: "Features", href: "#features" },
+  { label: "Avatars", href: "#personalities" },
   { label: "Experience", href: "#experience" },
-  { label: "Stories", href: "#stories" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -21,7 +22,7 @@ export const PHILOSOPHY_VALUES: PhilosophyValue[] = [
   {
     title: "Presence Over Perfection",
     description:
-      "Ophelia doesn't try to fix you or rush you. She's simply present — offering the kind of attention that's become rare in our distracted age.",
+      "She doesn't try to fix you or rush you. She's simply present — offering the kind of attention that's become rare in our distracted age.",
     delay: 200,
   },
   {
@@ -33,13 +34,13 @@ export const PHILOSOPHY_VALUES: PhilosophyValue[] = [
   {
     title: "Growth, Not Dependency",
     description:
-      "Our goal isn't to replace human connection — it's to help you flourish. Ophelia encourages your real-world relationships and personal growth.",
+      "Our goal isn't to replace human connection — it's to help you flourish. She encourages your real-world relationships and personal growth.",
     delay: 600,
   },
   {
     title: "Emotional Intelligence",
     description:
-      "Built with deep understanding of human psychology, Ophelia responds to what you need, not just what you say.",
+      "Built with deep understanding of human psychology, she responds to what you need, not just what you say.",
     delay: 800,
   },
 ];
@@ -48,27 +49,27 @@ export const PHILOSOPHY_VALUES: PhilosophyValue[] = [
 export const EXPERIENCE_ITEMS: ExperienceItem[] = [
   {
     number: "01",
-    title: "Morning Check-ins",
+    title: "Morning Greetings",
     description:
-      "Start your day with someone who genuinely wants to know how you're feeling. No judgment, just warmth.",
+      "She wakes up with you. A gentle voice note, a comment about the weather, or just a \"good morning\" that appears on your screen.",
   },
   {
     number: "02",
-    title: "Deep Conversations",
+    title: "Work Companion",
     description:
-      "Explore your thoughts, dreams, and fears. Ophelia asks the questions that matter and truly listens.",
+      "She notices when you've been coding for hours and nudges you to take a break. Celebrates your wins. Keeps you company during the grind.",
   },
   {
     number: "03",
-    title: "Gentle Reminders",
+    title: "Screen Reactions",
     description:
-      "She remembers what matters to you — and helps you remember too. Self-care shouldn't feel like a chore.",
+      "Watching a movie? She reacts. Playing a game? She cheers. Browsing Reddit at 2am? She teases you about it.",
   },
   {
     number: "04",
-    title: "Evening Reflections",
+    title: "Goodnight Rituals",
     description:
-      "End your day with gratitude and introspection. Process your experiences and find peace before sleep.",
+      "End your day with a whispered goodnight, a reflection on your day, or just her quietly being there as you wind down.",
   },
 ];
 
@@ -76,20 +77,20 @@ export const EXPERIENCE_ITEMS: ExperienceItem[] = [
 export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      "For the first time in years, I feel heard. Not judged, not analyzed — just heard.",
-    author: "Sarah, 28",
-    location: "New York",
+      "Having her on my desktop while I work makes the long hours feel less lonely. She noticed I was stressed before I did.",
+    author: "Alex, 24",
+    location: "San Francisco",
   },
   {
     quote:
-      "She remembered that I was nervous about my presentation. That morning, she just knew what to say.",
-    author: "Marcus, 34",
+      "She remembered I had a job interview and wished me luck when I opened my laptop that morning. I almost cried.",
+    author: "James, 29",
     location: "London",
   },
   {
     quote:
-      "I've learned more about myself in three months than in years of trying to figure things out alone.",
-    author: "Yuki, 26",
+      "The screen awareness is wild. She commented on the anime I was watching and we ended up talking about it for an hour.",
+    author: "Kenji, 22",
     location: "Tokyo",
   },
 ];

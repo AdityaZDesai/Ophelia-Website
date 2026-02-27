@@ -39,8 +39,8 @@ export function Waitlist() {
             Be among the first
           </h2>
           <p className="text-text-muted text-lg mb-12 max-w-md mx-auto">
-            We&apos;re carefully crafting Ophelia. Join our waitlist to be notified
-            when she&apos;s ready to meet you.
+            We&apos;re building something special. Join the waitlist to get early access
+            when harmonica launches on desktop.
           </p>
 
           {!submitted ? (
@@ -96,9 +96,8 @@ function SuccessMessage() {
       </div>
       <h3 className="font-serif text-2xl mb-2">You&apos;re on the list</h3>
       <p className="text-text-muted">
-        We&apos;ll be in touch soon. Thank you for your patience.
+        We&apos;ll notify you as soon as harmonica is ready for download. Thank you for your patience.
       </p>
     </div>
   );
 }
-

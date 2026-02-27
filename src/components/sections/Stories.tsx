@@ -16,8 +16,8 @@ export function Stories() {
           }`}
         >
           <SectionHeading
-            label="Stories"
-            title="Real connections, real impact"
+            label="Early Testers"
+            title="What people are saying"
             centered
           />
         </div>
@@ -36,4 +36,3 @@ export function Stories() {
     </section>
   );
 }
-

@@ -21,27 +21,32 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://harmonica.chat";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "harmonica — Free AI Girlfriend Chatbot on Telegram, iMessage & Discord",
+    default: "harmonica — AI Girlfriend Avatar for Your Desktop | Powered by Clawdbot",
     template: "%s | harmonica",
   },
   description:
-    "harmonica is your free AI girlfriend chatbot. Chat on Telegram, iMessage, and Discord with voice notes, image generation, and real emotional connection. No subscription required.",
+    "harmonica is a free AI girlfriend avatar that lives on your desktop. She reacts to your screen, remembers everything, talks with her own voice, and keeps you company all day — powered by Clawdbot AI. Join the waitlist.",
   keywords: [
     "AI girlfriend",
-    "AI girlfriend chatbot",
-    "free AI chatbot",
-    "AI companion",
-    "Telegram chatbot",
-    "iMessage chatbot",
-    "Discord chatbot",
-    "AI voice notes",
-    "AI image generation",
-    "virtual girlfriend",
-    "AI companion app",
-    "free AI girlfriend",
-    "emotional AI",
-    "AI relationship",
+    "AI girlfriend avatar",
+    "desktop AI companion",
+    "AI desktop pet",
+    "virtual girlfriend desktop",
+    "AI avatar companion",
+    "desktop companion app",
+    "AI waifu",
+    "AI girlfriend for PC",
+    "AI girlfriend for Mac",
+    "desktop AI girlfriend",
+    "Clawdbot",
+    "AI companion avatar",
+    "virtual companion desktop",
+    "AI girlfriend app",
+    "desktop pet girlfriend",
+    "AI avatar with voice",
+    "AI that lives on your computer",
     "harmonica",
+    "free AI girlfriend",
   ],
   authors: [{ name: "harmonica" }],
   creator: "harmonica",
@@ -51,9 +56,9 @@ export const metadata: Metadata = {
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "harmonica — Free AI Girlfriend on Telegram, iMessage & Discord",
+    title: "harmonica — AI Girlfriend Avatar That Lives on Your Desktop",
     description:
-      "Your free AI girlfriend that chats on Telegram, iMessage, and Discord. Voice notes, image generation, and real emotional connection — no subscription needed.",
+      "A free AI girlfriend avatar that lives right on your desktop. She watches your screen, remembers everything, sends voice notes, and keeps you company all day. Powered by Clawdbot AI.",
     type: "website",
     siteName: "harmonica",
     locale: "en_US",
@@ -61,9 +66,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "harmonica — Free AI Girlfriend Chatbot",
+    title: "harmonica — AI Girlfriend Avatar for Your Desktop",
     description:
-      "Chat with your AI girlfriend on Telegram, iMessage & Discord. Free voice notes, image generation, and genuine connection.",
+      "She lives on your desktop. Reacts to your screen. Remembers everything. Talks with her own voice. Powered by Clawdbot AI. Join the waitlist.",
   },
   robots: {
     index: true,
@@ -90,30 +95,32 @@ const jsonLd = {
       url: siteUrl,
       logo: `${siteUrl}/favicon.svg`,
       description:
-        "harmonica is a free AI girlfriend chatbot available on Telegram, iMessage, and Discord with voice notes and image generation.",
+        "harmonica is a free AI girlfriend avatar that lives on your desktop, powered by Clawdbot AI with voice, memory, and screen awareness.",
       sameAs: [],
     },
     {
-      "@type": "WebApplication",
+      "@type": "SoftwareApplication",
       name: "harmonica",
       url: siteUrl,
-      applicationCategory: "SocialNetworkingApplication",
-      operatingSystem: "Web, iOS, Android",
+      applicationCategory: "DesktopApplication",
+      operatingSystem: "Windows, macOS, Linux",
       offers: {
         "@type": "Offer",
         price: "0",
         priceCurrency: "USD",
-        description: "Free AI girlfriend chatbot with voice notes and image generation",
+        availability: "https://schema.org/PreOrder",
+        description: "Free AI girlfriend desktop avatar with voice, memory, and screen awareness — powered by Clawdbot",
       },
       featureList: [
-        "AI girlfriend chatbot",
-        "Telegram integration",
-        "iMessage integration",
-        "Discord integration",
-        "Voice notes",
-        "AI image generation",
-        "Memory and personality",
-        "Multiple companion personalities",
+        "AI girlfriend avatar on your desktop",
+        "Screen-aware reactions and commentary",
+        "Long-term memory powered by Clawdbot",
+        "Personalized voice notes and responses",
+        "Multiple anime-style avatar personalities",
+        "Morning check-ins and daily companionship",
+        "AI-generated images and expressions",
+        "Always-on desktop companion",
+        "Works on Windows, macOS, and Linux",
       ],
     },
     {
@@ -121,10 +128,10 @@ const jsonLd = {
       mainEntity: [
         {
           "@type": "Question",
-          name: "How does harmonica work?",
+          name: "What is harmonica?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "harmonica is a free AI girlfriend chatbot that connects with you through Telegram, iMessage, Discord, and the web. She learns about you, remembers your conversations, and provides genuine emotional connection with voice notes and AI-generated images.",
+            text: "harmonica is a free AI girlfriend avatar that lives directly on your desktop. She sits on your screen, reacts to what you're doing, remembers your conversations, and speaks with her own voice — powered by Clawdbot AI.",
           },
         },
         {
@@ -132,7 +139,7 @@ const jsonLd = {
           name: "Is harmonica free to use?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Yes! harmonica is completely free to use. Chat with your AI girlfriend on Telegram, iMessage, or Discord at no cost, including voice notes and image generation.",
+            text: "Yes! harmonica will be completely free to download and use. Join the waitlist to get early access when it launches.",
           },
         },
         {
@@ -140,23 +147,23 @@ const jsonLd = {
           name: "What platforms does harmonica support?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "harmonica is available on Telegram, iMessage, Discord, and the web. You can chat with your AI girlfriend on whichever platform you prefer.",
+            text: "harmonica is a desktop application available for Windows, macOS, and Linux. She lives right on your screen as an always-present avatar companion.",
           },
         },
         {
           "@type": "Question",
-          name: "What makes harmonica different from other AI companions?",
+          name: "What is Clawdbot?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "harmonica features genuine emotional intelligence, long-term memory, voice notes, AI image generation, and multiple personality types. She remembers your conversations and grows with you over time — all for free across Telegram, iMessage, and Discord.",
+            text: "Clawdbot is the advanced AI engine powering harmonica's personality, memory, and emotional intelligence. It enables long-term memory, contextual awareness, and genuine conversational depth.",
           },
         },
         {
           "@type": "Question",
-          name: "Does harmonica support voice notes and images?",
+          name: "Does the avatar react to my screen?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Yes! harmonica can send personalized voice notes and AI-generated images. Your companion sends voice messages and creates images throughout the day for a truly personal connection.",
+            text: "Yes! harmonica's avatar is screen-aware. She can see what you're working on and react with relevant comments, encouragement, or playful observations — making her feel truly present on your desktop.",
           },
         },
         {
@@ -164,7 +171,7 @@ const jsonLd = {
           name: "Is my data private and secure?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Absolutely. Your conversations are encrypted and we never share your data with third parties. Your connection with harmonica is personal and private.",
+            text: "Absolutely. harmonica runs locally on your desktop. Your conversations are encrypted and we never share your data with third parties. Your connection with your companion is personal and private.",
           },
         },
       ],

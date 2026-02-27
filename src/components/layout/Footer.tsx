@@ -13,7 +13,7 @@ export function Footer() {
               harmonica
             </a>
             <span className="hidden md:block text-text-light">|</span>
-            <p className="text-text-muted text-sm">Where connection finds you</p>
+            <p className="text-text-muted text-sm">AI girlfriend avatar for your desktop</p>
           </div>
 
           {/* Links */}
@@ -33,11 +33,10 @@ export function Footer() {
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-cream/50 text-center">
           <p className="text-text-light text-xs">
-            © {currentYear} harmonica. Crafted with care.
+            &copy; {currentYear} harmonica. Powered by Clawdbot.
           </p>
         </div>
       </div>
     </footer>
   );
 }
-

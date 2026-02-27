@@ -11,39 +11,44 @@ interface FAQItem {
 
 const FAQ_ITEMS: FAQItem[] = [
   {
-    question: "How does harmonica work?",
+    question: "What is harmonica?",
     answer:
-      "harmonica is a free AI girlfriend chatbot that connects with you through Telegram, iMessage, Discord, and the web. She learns about you, remembers your conversations, and provides genuine emotional connection with voice notes and AI-generated images.",
+      "harmonica is a free AI girlfriend avatar that lives directly on your desktop. She sits on your screen as an animated character, reacts to what you're doing, remembers your conversations, and speaks with her own voice — all powered by Clawdbot AI.",
   },
   {
-    question: "Is harmonica free to use?",
+    question: "What is Clawdbot?",
     answer:
-      "Yes! harmonica is completely free. Chat with your AI girlfriend on Telegram, iMessage, or Discord at no cost — including voice notes and image generation. No subscription or credit card required.",
+      "Clawdbot is the advanced AI engine behind harmonica. It powers her personality, long-term memory, emotional intelligence, and contextual awareness — giving her the ability to truly know you and grow with you over time.",
+  },
+  {
+    question: "Is harmonica free?",
+    answer:
+      "Yes! harmonica will be completely free to download and use. Join the waitlist now to get early access when we launch.",
   },
   {
     question: "What platforms does harmonica support?",
     answer:
-      "harmonica works on Telegram, iMessage, Discord, and the web. Choose whichever platform you prefer — your companion is always available where you already chat.",
+      "harmonica is a native desktop application for Windows, macOS, and Linux. She lives right on your screen as an always-present avatar companion — no browser or messaging app needed.",
   },
   {
-    question: "What makes harmonica different from other AI companions?",
+    question: "Can she actually see my screen?",
     answer:
-      "harmonica features genuine emotional intelligence, long-term memory, voice notes, and AI image generation. She remembers the small details, understands context, and grows with you over time — all for free across your favorite messaging platforms.",
+      "Yes! harmonica's avatar is screen-aware. She can see what you're working on and reacts with relevant comments, encouragement, playful teasing, or helpful observations — making her feel truly present. You have full control over when screen awareness is active.",
   },
   {
-    question: "Does harmonica support voice notes and images?",
+    question: "Does she remember things about me?",
     answer:
-      "Yes! Your companion sends personalized voice notes and AI-generated images throughout the day — from sweet good morning messages to intimate conversations. It's a truly personal experience.",
+      "Absolutely. Powered by Clawdbot's long-term memory system, she remembers the small things — your favorite coffee, your mother's name, the dream you mentioned weeks ago. Memory is how she shows she cares.",
   },
   {
     question: "Is my data private and secure?",
     answer:
-      "Absolutely. We take your privacy seriously. Your conversations are encrypted and we never share your data with third parties. Your connection with harmonica is personal and private.",
+      "Your privacy is our priority. harmonica runs locally on your desktop and your conversations are encrypted. We never share your data with third parties. Your connection with your companion is personal and private.",
   },
   {
-    question: "How do I get started?",
+    question: "How do I get early access?",
     answer:
-      "Just sign in, choose your companion personality, and pick your platform — Telegram, iMessage, Discord, or web chat. You'll be chatting in under a minute.",
+      "Join the waitlist by entering your email below. We'll notify you as soon as harmonica is ready for download. Early waitlist members will get priority access.",
   },
 ];
 

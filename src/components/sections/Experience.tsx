@@ -17,7 +17,7 @@ export function Experience() {
         >
           <SectionHeading
             label="The Experience"
-            title="A day with Ophelia"
+            title="A day with your avatar"
             centered
           />
         </div>
@@ -36,4 +36,3 @@ export function Experience() {
     </section>
   );
 }
-
