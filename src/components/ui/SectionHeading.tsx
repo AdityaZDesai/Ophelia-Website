@@ -13,11 +13,10 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <div className={`${centered ? "text-center" : ""} ${className}`}>
-      <p className="text-text-muted text-sm tracking-[0.3em] uppercase mb-6">
+      <p className="text-neon-purple text-sm tracking-[0.3em] uppercase mb-6 font-medium">
         {label}
       </p>
-      <h2 className="font-serif text-4xl md:text-6xl font-light">{title}</h2>
+      <h2 className="font-display text-4xl md:text-6xl font-semibold">{title}</h2>
     </div>
   );
 }
-

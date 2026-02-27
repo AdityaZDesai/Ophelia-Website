@@ -8,7 +8,7 @@ export function Stories() {
   const { ref, isInView } = useInView(0.2);
 
   return (
-    <section id="stories" ref={ref} className="py-32 px-6 bg-cream">
+    <section id="stories" ref={ref} className="py-32 px-6 bg-background-secondary">
       <div className="max-w-6xl mx-auto">
         <div
           className={`mb-20 transition-all duration-1000 ${

@@ -78,13 +78,13 @@ export function AudioPlayer({ src, name, className = "" }: AudioPlayerProps) {
 
     // Time updates (fallback for when not using requestAnimationFrame)
     audio.addEventListener("timeupdate", updateTime);
-    
+
     // Duration events
     audio.addEventListener("loadedmetadata", updateDuration);
     audio.addEventListener("durationchange", updateDuration);
     audio.addEventListener("canplay", updateDuration);
     audio.addEventListener("loadeddata", updateDuration);
-    
+
     // Playback state
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
@@ -129,7 +129,7 @@ export function AudioPlayer({ src, name, className = "" }: AudioPlayerProps) {
     const clickX = e.clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, clickX / rect.width));
     const newTime = percentage * duration;
-    
+
     audio.currentTime = newTime;
     setCurrentTime(newTime);
   };
@@ -147,9 +147,9 @@ export function AudioPlayer({ src, name, className = "" }: AudioPlayerProps) {
   const partialBarProgress = exactBarPosition - fullBars;
 
   return (
-    <div className={`bg-cream border border-accent/20 rounded-xl p-4 ${className}`}>
+    <div className={`glass-card p-4 ${className}`}>
       <audio ref={audioRef} src={src} preload="metadata" />
-      
+
       <div className="flex flex-col gap-3">
         {/* Name and Time */}
         <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export function AudioPlayer({ src, name, className = "" }: AudioPlayerProps) {
           {/* Play/Pause Button */}
           <button
             onClick={togglePlay}
-            className="flex-shrink-0 w-10 h-10 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/90 transition-colors"
+            className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-neon-purple to-neon-pink text-white flex items-center justify-center hover:shadow-lg hover:shadow-neon-purple/30 transition-all"
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
@@ -188,15 +188,13 @@ export function AudioPlayer({ src, name, className = "" }: AudioPlayerProps) {
               waveformBars.map((height, index) => {
                 const barHeight = height * 100;
                 let fillOpacity = 0;
-                
+
                 if (index < fullBars) {
-                  // Fully filled bars
                   fillOpacity = 1;
                 } else if (index === fullBars && partialBarProgress > 0) {
-                  // Partially filled bar (smooth transition)
                   fillOpacity = partialBarProgress;
                 }
-                
+
                 return (
                   <div
                     key={index}
@@ -208,14 +206,14 @@ export function AudioPlayer({ src, name, className = "" }: AudioPlayerProps) {
                   >
                     {/* Background (unfilled) */}
                     <div
-                      className="absolute inset-0 bg-accent/20 rounded-full"
+                      className="absolute inset-0 bg-white/10 rounded-full"
                       style={{
                         opacity: 1 - fillOpacity,
                       }}
                     />
-                    {/* Foreground (filled) */}
+                    {/* Foreground (filled) - gradient */}
                     <div
-                      className="absolute inset-0 bg-foreground rounded-full"
+                      className="absolute inset-0 rounded-full bg-gradient-to-t from-neon-purple to-neon-pink"
                       style={{
                         opacity: fillOpacity,
                       }}
@@ -228,7 +226,7 @@ export function AudioPlayer({ src, name, className = "" }: AudioPlayerProps) {
               Array.from({ length: 40 }).map((_, index) => (
                 <div
                   key={index}
-                  className="flex-1 rounded-full bg-accent/20"
+                  className="flex-1 rounded-full bg-white/10"
                   style={{
                     height: "50%",
                     minHeight: "6px",
@@ -242,4 +240,3 @@ export function AudioPlayer({ src, name, className = "" }: AudioPlayerProps) {
     </div>
   );
 }
-

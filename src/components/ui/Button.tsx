@@ -25,9 +25,9 @@ type ButtonProps = ButtonAsButton | ButtonAsAnchor;
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-foreground text-background hover:bg-foreground/90 shadow-lg shadow-foreground/10",
+    "bg-gradient-to-r from-neon-purple via-neon-pink to-neon-purple bg-[length:200%_100%] text-white shadow-lg shadow-neon-purple/25 hover:shadow-neon-purple/40 hover:bg-[position:100%_0]",
   secondary:
-    "bg-cream text-foreground hover:bg-cream/80 border border-cream",
+    "glass-card text-foreground hover:bg-white/10",
   ghost:
     "text-text-muted hover:text-foreground bg-transparent",
 };
@@ -46,7 +46,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "font-medium rounded-full transition-all hover:scale-105 tracking-wide inline-flex items-center justify-center";
+    "font-medium rounded-full transition-all duration-300 hover:scale-105 tracking-wide inline-flex items-center justify-center";
 
   const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`;
 
@@ -66,4 +66,3 @@ export function Button({
     </button>
   );
 }
-

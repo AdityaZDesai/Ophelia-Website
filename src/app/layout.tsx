@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
+import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
@@ -193,7 +193,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${cormorant.variable} ${jakarta.variable} antialiased`}
+        className={`${spaceGrotesk.variable} ${jakarta.variable} antialiased`}
       >
         {children}
       </body>

@@ -19,15 +19,15 @@ export function PersonalityCard({
       className={`
         group flex flex-col overflow-hidden rounded-2xl text-left transition-all duration-500
         hover:scale-[1.02] hover:shadow-2xl
-        ${isSelected 
-          ? "ring-2 ring-offset-4 ring-offset-[#0a0a0a] shadow-2xl scale-[1.02]" 
+        ${isSelected
+          ? "ring-2 ring-offset-4 ring-offset-[#0a0a0f] shadow-2xl scale-[1.02]"
           : "hover:ring-1 hover:ring-white/20"
         }
       `}
       style={{
         borderColor: isSelected ? personality.accentColor : "transparent",
-        boxShadow: isSelected 
-          ? `0 20px 60px -15px ${personality.accentColor}40` 
+        boxShadow: isSelected
+          ? `0 20px 60px -15px ${personality.accentColor}40`
           : undefined,
         ["--accent" as string]: personality.accentColor,
       }}
@@ -38,18 +38,18 @@ export function PersonalityCard({
           alt={personality.name}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
       </div>
 
       {/* Content */}
-      <div className="flex flex-col min-h-[240px] p-6 bg-background">
+      <div className="flex flex-col min-h-[240px] p-6 bg-background-secondary">
         {/* Name & Tagline */}
         <div className="mb-2">
-          <h3 className="font-cormorant text-3xl md:text-4xl font-semibold text-foreground mb-2 tracking-tight">
+          <h3 className="font-display text-3xl md:text-4xl font-semibold text-foreground mb-2 tracking-tight">
             {personality.name}
           </h3>
           <p
-            className="font-jakarta text-sm font-medium tracking-wider uppercase"
+            className="font-sans text-sm font-medium tracking-wider uppercase"
             style={{ color: personality.accentColor }}
           >
             {personality.tagline}
@@ -57,7 +57,7 @@ export function PersonalityCard({
         </div>
 
         {/* Description */}
-        <p className="font-jakarta text-text-muted text-sm leading-relaxed">
+        <p className="text-text-muted text-sm leading-relaxed">
           {personality.description}
         </p>
 
@@ -66,15 +66,14 @@ export function PersonalityCard({
           <div
             className={`
               w-5 h-5 rounded-full border-2 transition-all duration-300 flex items-center justify-center
-              ${isSelected ? "border-foreground bg-foreground" : "border-foreground/40"}
+              ${isSelected ? "border-neon-purple bg-neon-purple" : "border-foreground/40"}
             `}
           >
             {isSelected && (
               <svg
-                className="w-3 h-3"
+                className="w-3 h-3 text-white"
                 viewBox="0 0 12 12"
                 fill="none"
-                style={{ color: personality.accentColor }}
               >
                 <path
                   d="M2 6L5 9L10 3"
@@ -86,7 +85,7 @@ export function PersonalityCard({
               </svg>
             )}
           </div>
-          <span className="font-jakarta text-text-muted text-sm">
+          <span className="text-text-muted text-sm">
             {isSelected ? "Selected" : "Choose me"}
           </span>
         </div>

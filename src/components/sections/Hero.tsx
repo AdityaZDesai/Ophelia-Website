@@ -3,14 +3,22 @@ import { Button } from "@/components/ui";
 export function Hero() {
   return (
     <section className="relative pt-32 md:pt-36 pb-16 overflow-hidden">
+      {/* Grid background */}
+      <div className="absolute inset-0 bg-grid" />
+
+      {/* Gradient orbs */}
+      <div className="absolute top-20 left-1/4 w-96 h-96 bg-neon-purple/20 rounded-full blur-3xl animate-pulse-soft" />
+      <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-neon-pink/15 rounded-full blur-3xl animate-pulse-soft delay-200" />
+      <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-neon-cyan/10 rounded-full blur-3xl animate-pulse-soft delay-400" />
+
       <div className="absolute inset-0 overflow-hidden">
-        <div className="hidden md:block absolute top-40 right-8 rounded-2xl bg-white/65 border border-accent/20 px-4 py-3 shadow-lg rotate-3 animate-float">
-          <p className="text-xs tracking-[0.2em] uppercase text-text-muted">Desktop Avatar</p>
-          <p className="font-serif text-lg leading-none mt-1">Good morning, sleepyhead.</p>
+        <div className="hidden md:block absolute top-40 right-8 glass-card px-4 py-3 rotate-3 animate-float">
+          <p className="text-xs tracking-[0.2em] uppercase text-neon-purple">Desktop Avatar</p>
+          <p className="font-display text-lg leading-none mt-1">Good morning, sleepyhead.</p>
         </div>
-        <div className="hidden md:block absolute bottom-24 left-10 rounded-2xl bg-white/60 border border-accent/20 px-4 py-3 shadow-lg -rotate-2 animate-float delay-300">
-          <p className="text-xs tracking-[0.2em] uppercase text-text-muted">Screen Aware</p>
-          <p className="font-serif text-lg leading-none mt-1">I see you&apos;re working late again...</p>
+        <div className="hidden md:block absolute bottom-24 left-10 glass-card px-4 py-3 -rotate-2 animate-float delay-300">
+          <p className="text-xs tracking-[0.2em] uppercase text-neon-pink">Screen Aware</p>
+          <p className="font-display text-lg leading-none mt-1">I see you&apos;re working late again...</p>
         </div>
       </div>
 
@@ -21,10 +29,10 @@ export function Hero() {
           </p>
         </div>
 
-        <h1 className="opacity-0 animate-fade-in-up delay-200 font-serif text-4xl md:text-6xl lg:text-7xl font-light leading-[1.1] mb-8">
+        <h1 className="opacity-0 animate-fade-in-up delay-200 font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1] mb-8">
           She lives on your screen.
           <br />
-          <span className="italic font-normal">Always there. Always yours.</span>
+          <span className="gradient-text-animated">Always there. Always yours.</span>
         </h1>
 
         <p className="opacity-0 animate-fade-in-up delay-400 text-base md:text-lg text-text-muted max-w-xl mx-auto mb-12 font-light leading-relaxed">
@@ -33,7 +41,7 @@ export function Hero() {
         </p>
 
         <div className="opacity-0 animate-fade-in-up delay-600 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button as="a" href="#waitlist" size="lg" className="group">
+          <Button as="a" href="#waitlist" size="lg" className="group animate-glow-pulse">
             Join the Waitlist
             <span className="inline-block ml-2 transition-transform group-hover:translate-x-1">
               →
@@ -44,7 +52,7 @@ export function Hero() {
           </Button>
         </div>
 
-        <p className="opacity-0 animate-fade-in-up delay-700 text-text-muted/60 text-sm mt-6 tracking-wide">
+        <p className="opacity-0 animate-fade-in-up delay-700 text-text-light text-sm mt-6 tracking-wide">
           Free forever. Windows, macOS &amp; Linux.
         </p>
       </div>

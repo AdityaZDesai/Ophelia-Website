@@ -4,12 +4,12 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="py-16 px-6 border-t border-cream">
+    <footer className="py-16 px-6 border-t border-glass-border">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Brand */}
           <div className="flex items-center gap-8">
-            <a href="#" className="font-serif text-xl">
+            <a href="#" className="font-display text-xl font-semibold gradient-text">
               harmonica
             </a>
             <span className="hidden md:block text-text-light">|</span>
@@ -31,7 +31,7 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-cream/50 text-center">
+        <div className="mt-12 pt-8 border-t border-glass-border text-center">
           <p className="text-text-light text-xs">
             &copy; {currentYear} harmonica. Powered by Clawdbot.
           </p>

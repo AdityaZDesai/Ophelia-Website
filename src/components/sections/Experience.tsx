@@ -8,8 +8,11 @@ export function Experience() {
   const { ref, isInView } = useInView(0.2);
 
   return (
-    <section id="experience" ref={ref} className="pt-16 md:pt-20 pb-32 px-6">
-      <div className="max-w-6xl mx-auto">
+    <section id="experience" ref={ref} className="relative pt-16 md:pt-20 pb-32 px-6">
+      {/* Subtle grid background */}
+      <div className="absolute inset-0 bg-grid opacity-50" />
+
+      <div className="max-w-6xl mx-auto relative z-10">
         <div
           className={`mb-20 transition-all duration-1000 ${
             isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"

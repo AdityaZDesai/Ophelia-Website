@@ -22,13 +22,13 @@ export function Header() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-background/90 backdrop-blur-md py-4 shadow-sm"
+          ? "bg-background/80 backdrop-blur-xl py-4 border-b border-glass-border shadow-lg shadow-black/20"
           : "bg-transparent py-6"
       }`}
     >
       <nav className="max-w-6xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="font-serif text-2xl font-medium tracking-wide">
+        <a href="#" className="font-display text-2xl font-semibold tracking-wide gradient-text">
           harmonica
         </a>
 
@@ -50,6 +50,7 @@ export function Header() {
           <Button
             as="a"
             href="#waitlist"
+            size="sm"
             className="hidden sm:block"
           >
             Join Waitlist
@@ -89,7 +90,7 @@ export function Header() {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-md border-b border-cream transition-all duration-300 ${
+        className={`md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-glass-border transition-all duration-300 ${
           mobileMenuOpen
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-4 pointer-events-none"
@@ -109,7 +110,7 @@ export function Header() {
           <a
             href="#waitlist"
             onClick={closeMobileMenu}
-            className="text-center text-sm font-medium px-6 py-3 bg-foreground text-background rounded-full mt-2"
+            className="text-center text-sm font-medium px-6 py-3 bg-gradient-to-r from-neon-purple to-neon-pink text-white rounded-full mt-2"
           >
             Join Waitlist
           </a>

@@ -87,18 +87,20 @@ export function FAQ() {
           {FAQ_ITEMS.map((item, index) => (
             <div
               key={index}
-              className="bg-cream border border-accent/20 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md"
+              className={`glass-card overflow-hidden transition-all duration-300 hover:bg-white/[0.08] ${
+                openIndex === index ? "neon-border" : ""
+              }`}
             >
               <button
                 onClick={() => toggleQuestion(index)}
                 className="w-full px-6 md:px-8 py-5 md:py-6 text-left flex items-center justify-between gap-4 group"
                 aria-expanded={openIndex === index}
               >
-                <h3 className="font-serif text-lg md:text-xl font-light text-foreground pr-4">
+                <h3 className="font-display text-lg md:text-xl font-medium text-foreground pr-4">
                   {item.question}
                 </h3>
                 <svg
-                  className={`w-5 h-5 text-text-muted flex-shrink-0 transition-transform duration-300 ${
+                  className={`w-5 h-5 text-neon-purple flex-shrink-0 transition-transform duration-300 ${
                     openIndex === index ? "rotate-180" : ""
                   }`}
                   fill="none"
