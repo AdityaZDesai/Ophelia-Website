@@ -363,7 +363,6 @@ a {
   filter: saturate(1.05);
 }
 
-/* ── Canvas visibility states ── */
 .hiyori-canvas {
   width: 420px;
   height: 560px;
@@ -374,65 +373,8 @@ a {
     radial-gradient(circle at 50% 100%, rgba(217, 255, 255, 0.1), transparent 62%);
   backdrop-filter: blur(3px);
   overflow: hidden;
-  transition: opacity 800ms cubic-bezier(0.2, 0.6, 0.2, 1), transform 600ms cubic-bezier(0.2, 0.6, 0.2, 1);
-}
-
-.hiyori-canvas--hidden {
-  opacity: 0;
-  transform: scale(0.96) translateY(12px);
-  pointer-events: none;
-}
-
-.hiyori-canvas--visible {
-  opacity: 1;
-  transform: scale(1) translateY(0);
   pointer-events: auto;
   cursor: pointer;
-}
-
-/* ── Loading spinner ── */
-.hiyori-loader {
-  position: absolute;
-  inset: 0;
-  width: 420px;
-  height: 560px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  border-radius: 2rem;
-  background:
-    radial-gradient(circle at 50% 40%, rgba(217, 255, 255, 0.06), transparent 60%),
-    rgba(10, 10, 11, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(6px);
-}
-
-.hiyori-loader-ring {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid rgba(217, 255, 255, 0.15);
-  border-top-color: rgba(217, 255, 255, 0.7);
-  animation: hiyori-spin 1s linear infinite;
-}
-
-.hiyori-loader span {
-  font-size: 0.68rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(217, 255, 255, 0.5);
-  animation: hiyori-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes hiyori-spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes hiyori-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
 }
 
 /* ── Click sparkle particles ── */
@@ -553,11 +495,6 @@ a {
   }
 
   .hiyori-canvas {
-    width: 290px;
-    height: 380px;
-  }
-
-  .hiyori-loader {
     width: 290px;
     height: 380px;
   }

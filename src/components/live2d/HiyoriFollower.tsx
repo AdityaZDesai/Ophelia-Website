@@ -189,33 +189,35 @@ export function HiyoriFollower() {
           shellRef.current.style.transform = `translate3d(${currentX + floatX}px, ${currentY + floatY}px, 0)`;
 
           // Mouse tracking — make eyes/head follow cursor
-          if (!reduced && model.internalModel?.coreModel) {
-            const core = model.internalModel.coreModel;
-            const shellRect = shellRef.current.getBoundingClientRect();
-            const centerX = shellRect.left + shellRect.width / 2;
-            const centerY = shellRect.top + shellRect.height * 0.3;
+          if (!reduced && model.internalModel) {
+            try {
+              const mgr = model.internalModel.coreModel;
+              const shellRect = shellRef.current.getBoundingClientRect();
+              const centerX = shellRect.left + shellRect.width / 2;
+              const centerY = shellRect.top + shellRect.height * 0.3;
 
-            // Normalize to -1..1 range
-            const dx = (mouseX - centerX) / (window.innerWidth / 2);
-            const dy = (mouseY - centerY) / (window.innerHeight / 2);
-            const clampedX = Math.max(-1, Math.min(1, dx));
-            const clampedY = Math.max(-1, Math.min(1, dy));
+              const dx = (mouseX - centerX) / (window.innerWidth / 2);
+              const dy = (mouseY - centerY) / (window.innerHeight / 2);
+              const clampedX = Math.max(-1, Math.min(1, dx));
+              const clampedY = Math.max(-1, Math.min(1, dy));
 
-            // Apply to model parameters (smooth lerp)
-            const setParam = (id: string, target: number, speed: number) => {
-              const idx = core.getParameterIndex(id);
-              if (idx < 0) return;
-              const current = core.getParameterValue(idx);
-              core.setParameterValue(idx, current + (target - current) * speed);
-            };
+              const setParam = (id: string, target: number, speed: number) => {
+                const idx = mgr._parameterIds?.indexOf(id) ?? -1;
+                if (idx < 0 || !mgr._parameterValues) return;
+                const current = mgr._parameterValues[idx];
+                mgr._parameterValues[idx] = current + (target - current) * speed;
+              };
 
-            setParam("ParamAngleX", clampedX * 30, 0.08);
-            setParam("ParamAngleY", clampedY * -15, 0.08);
-            setParam("ParamAngleZ", clampedX * -8, 0.05);
-            setParam("ParamBodyAngleX", clampedX * 8, 0.06);
-            setParam("ParamBodyAngleY", clampedY * -4, 0.06);
-            setParam("ParamEyeBallX", clampedX * 0.8, 0.12);
-            setParam("ParamEyeBallY", clampedY * -0.8, 0.12);
+              setParam("ParamAngleX", clampedX * 30, 0.08);
+              setParam("ParamAngleY", clampedY * -15, 0.08);
+              setParam("ParamAngleZ", clampedX * -8, 0.05);
+              setParam("ParamBodyAngleX", clampedX * 8, 0.06);
+              setParam("ParamBodyAngleY", clampedY * -4, 0.06);
+              setParam("ParamEyeBallX", clampedX * 0.8, 0.12);
+              setParam("ParamEyeBallY", clampedY * -0.8, 0.12);
+            } catch {
+              // coreModel API not available — skip tracking
+            }
           }
         });
 
@@ -262,29 +264,18 @@ export function HiyoriFollower() {
   }, []);
 
   return (
-    <div className="hiyori-shell" ref={shellRef} aria-hidden="true">
-      {/* Loading pulse shown while model assembles */}
-      {!live2dReady && !loadFailed && (
-        <div className="hiyori-loader">
-          <div className="hiyori-loader-ring" />
-          <span>Loading</span>
-        </div>
-      )}
-
-      {/* Canvas is invisible until live2dReady flips */}
+    <div
+      className="hiyori-shell"
+      ref={shellRef}
+      aria-hidden="true"
+      style={{ visibility: live2dReady ? "visible" : "hidden" }}
+    >
       <div
-        className={`hiyori-canvas ${live2dReady ? "hiyori-canvas--visible" : "hiyori-canvas--hidden"}`}
+        className="hiyori-canvas"
         ref={canvasRef}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
       />
-
-      {loadFailed && (
-        <div className="hiyori-fallback hiyori-fallback--overlay">
-          <img src="/Hiyori.2048/texture_00.png" alt="Hiyori" width={330} height={460} />
-        </div>
-      )}
-
       <p>Hiyori</p>
     </div>
   );
