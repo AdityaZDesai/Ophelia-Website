@@ -12,6 +12,8 @@
     "better-auth": "^1.4.10",
     "next": "16.1.1",
     "pg": "^8.16.3",
+    "pixi-live2d-display": "^0.4.0",
+    "pixi.js": "^6.5.10",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
