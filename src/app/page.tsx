@@ -51,8 +51,59 @@ const FAQ = [
 export default function Home() {
   const [email, setEmail] = useState("");
   const [joined, setJoined] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("You are on the list.");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const year = useMemo(() => new Date().getFullYear(), []);
+
+  const handleWaitlistSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          source: "landing_page",
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { alreadyJoined?: boolean; error?: string }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "Could not join waitlist right now.");
+      }
+
+      if (payload?.alreadyJoined) {
+        setSuccessMessage("You are already on the list.");
+      } else {
+        setSuccessMessage("You are on the list.");
+      }
+
+      setJoined(true);
+      setEmail("");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not join waitlist right now.";
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="jobs-root">
@@ -132,26 +183,23 @@ export default function Home() {
         <p>WAITLIST</p>
         <h2>Get early access to Harmonica.</h2>
         {!joined ? (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (email.trim()) {
-                setJoined(true);
-              }
-            }}
-          >
+          <form onSubmit={handleWaitlistSubmit}>
             <input
               type="email"
               required
               placeholder="you@domain.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              disabled={isSubmitting}
             />
-            <button type="submit">Join Waitlist</button>
+            <button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Joining..." : "Join Waitlist"}
+            </button>
           </form>
         ) : (
-          <div className="waitlist-success">You are on the list.</div>
+          <div className="waitlist-success">{successMessage}</div>
         )}
+        {submitError ? <span>{submitError}</span> : null}
       </section>
 
       <footer className="jobs-footer">
