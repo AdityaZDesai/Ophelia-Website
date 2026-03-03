@@ -60,12 +60,12 @@ export function HiyoriFollower() {
     const resolveLayout = () => {
       const mobile = window.innerWidth <= 680;
       if (mobile) {
-        return { mobile: true, width: 160, height: 220 };
+        return { mobile: true, width: 160, height: 220, scale: 0.13, floorOffset: 3 };
       }
       if (window.innerWidth <= 900) {
-        return { mobile: false, width: 290, height: 380 };
+        return { mobile: false, width: 290, height: 380, scale: 0.21, floorOffset: 12 };
       }
-      return { mobile: false, width: 420, height: 560 };
+      return { mobile: false, width: 420, height: 560, scale: 0.32, floorOffset: 20 };
     };
 
     let layout = resolveLayout();
@@ -106,16 +106,14 @@ export function HiyoriFollower() {
         return;
       }
 
-      if (Number.isFinite(model.width) && Number.isFinite(model.height) && model.width > 0 && model.height > 0) {
-        baseScale = Math.min(layout.width / model.width, layout.height / model.height) * (layout.mobile ? 0.84 : 0.92);
-      }
+      baseScale = layout.scale;
 
       model.scale.set(baseScale);
 
       if (model.anchor?.set) {
         model.anchor.set(0.5, 1);
         model.x = layout.width * 0.5;
-        model.y = layout.height - 2;
+        model.y = layout.height - layout.floorOffset;
         return;
       }
 
