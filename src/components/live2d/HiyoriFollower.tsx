@@ -57,14 +57,28 @@ export function HiyoriFollower() {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    const resolveLayout = () => {
+      const mobile = window.innerWidth <= 680;
+      if (mobile) {
+        return { mobile: true, width: 160, height: 220 };
+      }
+      if (window.innerWidth <= 900) {
+        return { mobile: false, width: 290, height: 380 };
+      }
+      return { mobile: false, width: 420, height: 560 };
+    };
+
+    let layout = resolveLayout();
+
     let disposed = false;
     let app: any;
     let model: any;
     let idleTimer: ReturnType<typeof setInterval> | null = null;
-    let targetY = Math.min(window.innerHeight - 360, 140);
+    let targetY = Math.max(8, window.innerHeight - layout.height - (layout.mobile ? 14 : 20));
     let currentY = targetY;
-    let targetX = Math.max(12, window.innerWidth - 300);
+    let targetX = Math.max(8, window.innerWidth - layout.width - (layout.mobile ? 10 : 24));
     let currentX = targetX;
+    let baseScale = 0.32;
 
     // mouse tracking state
     let mouseX = window.innerWidth / 2;
@@ -75,6 +89,55 @@ export function HiyoriFollower() {
       mouseY = e.clientY;
     };
     window.addEventListener("mousemove", onMouseMove, { passive: true });
+
+    const updateTargets = () => {
+      if (layout.mobile) {
+        targetY = Math.max(8, window.innerHeight - layout.height - 14);
+        targetX = Math.max(8, window.innerWidth - layout.width - 10);
+        return;
+      }
+
+      targetY = Math.max(8, Math.min(window.innerHeight - layout.height - 12, 48 + window.scrollY * 0.06));
+      targetX = Math.max(8, window.innerWidth - layout.width - (window.innerWidth <= 900 ? 20 : 24));
+    };
+
+    const placeModel = () => {
+      if (!model) {
+        return;
+      }
+
+      if (Number.isFinite(model.width) && Number.isFinite(model.height) && model.width > 0 && model.height > 0) {
+        baseScale = Math.min(layout.width / model.width, layout.height / model.height) * (layout.mobile ? 0.84 : 0.92);
+      }
+
+      model.scale.set(baseScale);
+
+      if (model.anchor?.set) {
+        model.anchor.set(0.5, 1);
+        model.x = layout.width * 0.5;
+        model.y = layout.height - 2;
+        return;
+      }
+
+      model.x = (layout.width - model.width) * 0.5;
+      model.y = layout.height - model.height;
+    };
+
+    const applyLayout = () => {
+      layout = resolveLayout();
+
+      if (canvasRef.current) {
+        canvasRef.current.style.width = `${layout.width}px`;
+        canvasRef.current.style.height = `${layout.height}px`;
+      }
+
+      if (app?.renderer?.resize) {
+        app.renderer.resize(layout.width, layout.height);
+      }
+
+      placeModel();
+      updateTargets();
+    };
 
     const ensureCubismCore = async () => {
       if ((window as Window & { Live2DCubismCore?: unknown }).Live2DCubismCore) {
@@ -119,8 +182,8 @@ export function HiyoriFollower() {
         }
 
         app = new PIXI.Application({
-          width: 420,
-          height: 560,
+          width: layout.width,
+          height: layout.height,
           backgroundAlpha: 0,
           antialias: true,
           autoDensity: true,
@@ -138,18 +201,7 @@ export function HiyoriFollower() {
 
         app.stage.addChild(model);
         modelRef.current = model;
-
-        let modelScale = 0.32;
-        if (Number.isFinite(model.width) && Number.isFinite(model.height) && model.width > 0 && model.height > 0) {
-          modelScale = Math.min(420 / model.width, 560 / model.height) * 0.92;
-        }
-
-        model.scale.set(modelScale);
-        if (model.anchor?.set) {
-          model.anchor.set(0.5, 1);
-        }
-        model.x = 210;
-        model.y = 540;
+        applyLayout();
 
         // Model is fully assembled — reveal it
         setLive2dReady(true);
@@ -176,9 +228,9 @@ export function HiyoriFollower() {
 
           // Gentle breathing scale pulse
           const breathe = 1 + Math.sin(performance.now() / 2000) * 0.006;
-          model.scale.set(modelScale * breathe);
+          model.scale.set(baseScale * breathe);
 
-          if (!reduced) {
+          if (!reduced && !layout.mobile) {
             currentY += (targetY - currentY) * 0.08;
             currentX += (targetX - currentX) * 0.07;
           } else {
@@ -186,7 +238,7 @@ export function HiyoriFollower() {
             currentX = targetX;
           }
 
-          shellRef.current.style.transform = `translate3d(${currentX + floatX}px, ${currentY + floatY}px, 0)`;
+          shellRef.current.style.transform = `translate3d(${currentX + (layout.mobile ? 0 : floatX)}px, ${currentY + (layout.mobile ? 0 : floatY)}px, 0)`;
 
           // Mouse tracking — make eyes/head follow cursor
           if (!reduced && model.internalModel) {
@@ -222,17 +274,18 @@ export function HiyoriFollower() {
         });
 
         const onScroll = () => {
-          targetY = Math.max(8, Math.min(window.innerHeight - 600, 48 + window.scrollY * 0.06));
-          targetX = Math.max(8, window.innerWidth - 450);
+          if (!layout.mobile) {
+            updateTargets();
+          }
         };
 
-        onScroll();
+        applyLayout();
         window.addEventListener("scroll", onScroll, { passive: true });
-        window.addEventListener("resize", onScroll);
+        window.addEventListener("resize", applyLayout);
 
         return () => {
           window.removeEventListener("scroll", onScroll);
-          window.removeEventListener("resize", onScroll);
+          window.removeEventListener("resize", applyLayout);
         };
       } catch (error) {
         setLoadFailed(true);

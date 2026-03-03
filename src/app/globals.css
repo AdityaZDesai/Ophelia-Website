@@ -510,13 +510,14 @@ a {
 
 @media (max-width: 680px) {
   .hiyori-shell {
-    width: 220px;
-    opacity: 0.84;
+    width: 160px;
+    opacity: 0.74;
   }
 
   .hiyori-canvas {
-    width: 220px;
-    height: 300px;
+    width: 160px;
+    height: 220px;
+    border-radius: 1rem;
   }
 
   .hiyori-shell p {
