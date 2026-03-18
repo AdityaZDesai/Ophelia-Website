@@ -6,8 +6,8 @@ import { useEffect, useRef, useState } from "react";
  * Custom hook for detecting when an element enters the viewport
  * Used for scroll-triggered animations
  */
-export function useInView(threshold = 0.1) {
-  const ref = useRef<HTMLDivElement>(null);
+export function useInView(threshold = 0.1, rootMargin = "0px 0px -60px 0px") {
+  const ref = useRef<HTMLElement>(null);
   const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export function useInView(threshold = 0.1) {
           setIsInView(true);
         }
       },
-      { threshold }
+      { threshold, rootMargin }
     );
 
     if (ref.current) {
@@ -25,7 +25,7 @@ export function useInView(threshold = 0.1) {
     }
 
     return () => observer.disconnect();
-  }, [threshold]);
+  }, [threshold, rootMargin]);
 
   return { ref, isInView };
 }

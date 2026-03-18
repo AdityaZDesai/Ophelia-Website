@@ -16,29 +16,29 @@ const notoSansJp = Noto_Sans_JP({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://harmonica.chat";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://loveharmonica.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "harmonica | AI Girlfriend Desktop Companion",
+    default: "harmonica | She lives on your desktop",
     template: "%s | harmonica",
   },
   description:
-    "harmonica is a premium desktop AI girlfriend that lives on your screen, grows personality over time, and shares real moments with you.",
+    "An AI girlfriend that stays on your screen — watching, reacting, remembering. Not an app you open. Not a chat you forget.",
   openGraph: {
-    title: "harmonica | AI Girlfriend Desktop Companion",
+    title: "harmonica | She lives on your desktop",
     description:
-      "An always-on desktop AI girlfriend with anime presence, evolving emotions, and shared experiences like music, videos, and travel planning.",
+      "An AI girlfriend that stays on your screen — watching, reacting, remembering. Join the waitlist.",
     type: "website",
     siteName: "harmonica",
     url: siteUrl,
   },
   twitter: {
     card: "summary_large_image",
-    title: "harmonica | AI Girlfriend Desktop Companion",
+    title: "harmonica | She lives on your desktop",
     description:
-      "A premium desktop AI girlfriend experience with always-on presence and evolving emotional behavior.",
+      "An AI girlfriend that stays on your screen — watching, reacting, remembering. Join the waitlist.",
   },
   icons: {
     icon: "/favicon.svg",
