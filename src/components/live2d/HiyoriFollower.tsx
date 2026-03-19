@@ -60,12 +60,12 @@ export function HiyoriFollower() {
     const resolveLayout = () => {
       const mobile = window.innerWidth <= 680;
       if (mobile) {
-        return { mobile: true, width: 130, height: 180, scale: 0.13, floorOffset: 3 };
+        return { mobile: true, width: 160, height: 220, scale: 0.15, floorOffset: 4 };
       }
       if (window.innerWidth <= 900) {
-        return { mobile: false, width: 220, height: 300, scale: 0.21, floorOffset: 10 };
+        return { mobile: false, width: 280, height: 380, scale: 0.24, floorOffset: 12 };
       }
-      return { mobile: false, width: 280, height: 380, scale: 0.28, floorOffset: 14 };
+      return { mobile: false, width: 350, height: 470, scale: 0.30, floorOffset: 16 };
     };
 
     let layout = resolveLayout();
