@@ -106,7 +106,14 @@ export function HiyoriFollower() {
         return;
       }
 
-      baseScale = layout.scale;
+      // Calculate scale to fit model within canvas with some padding
+      const naturalW = model.width / (model.scale?.x || 1);
+      const naturalH = model.height / (model.scale?.y || 1);
+      if (naturalW > 0 && naturalH > 0) {
+        baseScale = Math.min(layout.width / naturalW, layout.height / naturalH) * 0.88;
+      } else {
+        baseScale = layout.scale;
+      }
 
       model.scale.set(baseScale);
 
